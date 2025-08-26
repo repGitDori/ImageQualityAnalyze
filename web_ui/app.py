@@ -127,24 +127,18 @@ def analyze_image():
                     output_dir = os.path.join(temp_dir, 'viz')
                     os.makedirs(output_dir, exist_ok=True)
                     
-                    # Generate all visualizations
-                    viz_types = ['histograms', 'illumination_heatmap', 'sharpness_heatmap', 
-                                'margin_bars', 'skew_dial', 'document_overlay']
-                    
-                    for viz_type in viz_types:
-                        try:
-                            viz_path = graph_generator.create_visualization(
-                                temp_path, result, viz_type, 
-                                os.path.join(output_dir, f"{viz_type}.png")
-                            )
+                    # Generate all visualizations using the correct method
+                    try:
+                        viz_files = graph_generator.generate_all_graphs(temp_path, result, output_dir)
+                        for viz_type, viz_path in viz_files.items():
                             if viz_path and os.path.exists(viz_path):
                                 viz_paths.append({
                                     'type': viz_type,
                                     'path': viz_path,
-                                    'filename': f"{viz_type}.png"
+                                    'filename': os.path.basename(viz_path)
                                 })
-                        except Exception as viz_error:
-                            print(f"Visualization error for {viz_type}: {viz_error}")
+                    except Exception as viz_error:
+                        print(f"Visualization generation error: {viz_error}")
                 
                 # Complete analysis
                 analysis_progress[analysis_id]['stage'] = 'Analysis complete!'
@@ -187,6 +181,46 @@ def analyze_image():
             'success': False,
             'error': str(e)
         }), 500
+
+@app.route('/api/analysis/<analysis_id>/progress')
+def get_analysis_progress(analysis_id):
+    """Get real-time analysis progress"""
+    try:
+        if analysis_id not in analysis_progress:
+            return jsonify({
+                'success': False,
+                'error': 'Analysis ID not found'
+            }), 404
+        
+        progress_data = analysis_progress[analysis_id]
+        return jsonify({
+            'success': True,
+            'status': progress_data['status'],
+            'progress': progress_data['progress'],
+            'stage': progress_data['stage'],
+            'results': progress_data['results'],
+            'error': progress_data['error']
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/visualization/<path:filename>')
+def serve_visualization(filename):
+    """Serve generated visualization files"""
+    try:
+        # Find the file in temporary directories
+        for temp_dir in os.listdir(tempfile.gettempdir()):
+            viz_path = os.path.join(tempfile.gettempdir(), temp_dir, 'viz', filename)
+            if os.path.exists(viz_path):
+                return send_from_directory(os.path.dirname(viz_path), filename)
+        
+        return jsonify({'error': 'Visualization not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     print("🚀 Starting ImageQualityAnalyzer Web UI...")
