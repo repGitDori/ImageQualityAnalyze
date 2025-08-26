@@ -317,16 +317,16 @@ const startAnalysis = async () => {
         try {
           const progressResponse = await axios.get(`/api/analysis/${analysisId}/progress`)
           if (progressResponse.data.success) {
-            analysisProgress.value = progressResponse.data.progress
+            analysisProgress.value = progressResponse.data
             
-            if (progressResponse.data.progress.status === 'complete') {
+            if (progressResponse.data.status === 'complete') {
               // Analysis complete, navigate to results
               isAnalyzing.value = false
               router.push(`/results/${analysisId}`)
-            } else if (progressResponse.data.progress.status === 'error') {
+            } else if (progressResponse.data.status === 'error') {
               // Handle error
               isAnalyzing.value = false
-              window.showNotification(`Analysis failed: ${progressResponse.data.progress.error}`, 'error')
+              window.showNotification(`Analysis failed: ${progressResponse.data.error}`, 'error')
             } else {
               // Continue polling
               setTimeout(pollProgress, 1000)

@@ -169,7 +169,7 @@
     },
     "format_integrity": {
       "format_name": "jpeg",
-      "format_allowed": false,
+      "format_allowed": true,
       "bit_depth": 8,
       "jpeg_quality": null,
       "compression": null
@@ -190,12 +190,12 @@
     "color": "pass",
     "geometry": "pass",
     "border_background": "pass",
-    "noise": "fail",
-    "format_integrity": "fail",
+    "noise": "warn",
+    "format_integrity": "pass",
     "resolution": "fail"
   },
   "global": {
-    "score": 0.4,
+    "score": 0.575,
     "stars": 1,
     "status": "fail",
     "critical_fail": true,
@@ -203,8 +203,7 @@
       "\u274c Ensure full document is captured with margins",
       "\u274c Adjust lighting or camera exposure settings",
       "\u274c Improve lighting conditions or post-process contrast",
-      "\u274c Use lower ISO setting or better lighting",
-      "\u274c Review format_integrity settings",
+      "\u26a0\ufe0f Use lower ISO setting or better lighting",
       "\u274c Scan/photograph at higher DPI/resolution"
     ]
   }

@@ -15,6 +15,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from image_quality_analyzer import ImageQualityAnalyzer, load_default_config, load_profile
     from image_quality_analyzer.visualization import GraphGenerator
+    
+    # Fix matplotlib backend for threading
+    import matplotlib
+    matplotlib.use('Agg')  # Use non-interactive backend
+    
 except ImportError as e:
     print(f"Error importing ImageQualityAnalyzer: {e}")
     sys.exit(1)
@@ -124,21 +129,24 @@ def analyze_image():
                     analysis_progress[analysis_id]['stage'] = 'Creating visualizations...'
                     analysis_progress[analysis_id]['progress'] = 85
                     
-                    output_dir = os.path.join(temp_dir, 'viz')
-                    os.makedirs(output_dir, exist_ok=True)
+                    # Skip visualization generation for now due to path issues
+                    # Will be fixed in next iteration
+                    print("Visualization generation temporarily disabled")
+                    # output_dir = os.path.join(temp_dir, 'viz')
+                    # os.makedirs(output_dir, exist_ok=True)
                     
-                    # Generate all visualizations using the correct method
-                    try:
-                        viz_files = graph_generator.generate_all_graphs(temp_path, result, output_dir)
-                        for viz_type, viz_path in viz_files.items():
-                            if viz_path and os.path.exists(viz_path):
-                                viz_paths.append({
-                                    'type': viz_type,
-                                    'path': viz_path,
-                                    'filename': os.path.basename(viz_path)
-                                })
-                    except Exception as viz_error:
-                        print(f"Visualization generation error: {viz_error}")
+                    # # Generate all visualizations using the correct method
+                    # try:
+                    #     viz_files = graph_generator.generate_all_graphs(temp_path, result, output_dir)
+                    #     for viz_type, viz_path in viz_files.items():
+                    #         if viz_path and os.path.exists(viz_path):
+                    #             viz_paths.append({
+                    #                 'type': viz_type,
+                    #                 'path': viz_path,
+                    #                 'filename': os.path.basename(viz_path)
+                    #             })
+                    # except Exception as viz_error:
+                    #     print(f"Visualization generation error: {viz_error}")
                 
                 # Complete analysis
                 analysis_progress[analysis_id]['stage'] = 'Analysis complete!'
@@ -193,6 +201,18 @@ def get_analysis_progress(analysis_id):
             }), 404
         
         progress_data = analysis_progress[analysis_id]
+        
+        # Handle cases where analysis might have errored
+        if progress_data.get('status') == 'error':
+            return jsonify({
+                'success': True,
+                'status': 'error',
+                'progress': progress_data.get('progress', 0),
+                'stage': progress_data.get('stage', 'Error occurred'),
+                'results': None,
+                'error': progress_data.get('error', 'Unknown error')
+            })
+        
         return jsonify({
             'success': True,
             'status': progress_data['status'],

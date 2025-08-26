@@ -278,10 +278,10 @@ const loadResults = async () => {
     
     const response = await axios.get(`/api/analysis/${analysisId}/progress`)
     
-    if (response.data.success && response.data.progress.status === 'complete') {
-      results.value = response.data.progress.results
-    } else if (response.data.progress.status === 'error') {
-      error.value = response.data.progress.error
+    if (response.data.success && response.data.status === 'complete') {
+      results.value = response.data.results
+    } else if (response.data.status === 'error') {
+      error.value = response.data.error
     } else {
       error.value = 'Analysis not complete or not found'
     }
