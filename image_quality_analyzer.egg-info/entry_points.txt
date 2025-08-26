@@ -1,0 +1,2 @@
+[console_scripts]
+image-quality-analyzer = cli:cli

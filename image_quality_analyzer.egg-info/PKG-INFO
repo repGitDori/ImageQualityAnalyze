@@ -1,0 +1,141 @@
+Metadata-Version: 2.2
+Name: image-quality-analyzer
+Version: 1.0.0
+Summary: Advanced image quality checker for document photos and scans
+Home-page: https://github.com/example/ImageQualityAnalyzer
+Author: ImageQualityAnalyze Team
+Author-email: contact@example.com
+Project-URL: Bug Reports, https://github.com/example/ImageQualityAnalyzer/issues
+Project-URL: Source, https://github.com/example/ImageQualityAnalyzer
+Project-URL: Documentation, https://github.com/example/ImageQualityAnalyzer#readme
+Keywords: image quality document scan photo analysis metrics sharpness contrast
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Scientific/Engineering :: Image Processing
+Classifier: Topic :: Scientific/Engineering :: Image Recognition
+Classifier: Topic :: Multimedia :: Graphics :: Graphics Conversion
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: opencv-python>=4.5.0
+Requires-Dist: Pillow>=8.3.0
+Requires-Dist: matplotlib>=3.5.0
+Requires-Dist: seaborn>=0.11.0
+Requires-Dist: scipy>=1.7.0
+Requires-Dist: scikit-image>=0.19.0
+Requires-Dist: colorspacious>=1.1.2
+Requires-Dist: jsonschema>=4.0.0
+Requires-Dist: click>=8.0.0
+Requires-Dist: pandas>=1.3.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: pytest-cov>=2.0; extra == "dev"
+Requires-Dist: black>=21.0; extra == "dev"
+Requires-Dist: flake8>=3.8; extra == "dev"
+Requires-Dist: mypy>=0.910; extra == "dev"
+Provides-Extra: gui
+Requires-Dist: tkinter; extra == "gui"
+Requires-Dist: PyQt5>=5.15.0; extra == "gui"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# ImageQualityAnalyze
+
+An advanced image quality checker for document photos and scans that provides:
+- Objective metrics computation
+- Interactive graphs for human review
+- User-configurable parameters
+- Pass/Warn/Fail flagging system
+- Export capabilities for batch comparison
+
+## Features
+
+- **Comprehensive Metrics**: Resolution, sharpness, exposure, contrast, geometry, noise, color accuracy
+- **Visual Analysis**: Histograms, heatmaps, margin charts, skew dials, and more
+- **Configurable Thresholds**: JSON-based parameter system with sensible defaults
+- **Scoring System**: 4-star quality rating with category-based evaluation
+- **Export Options**: JSON reports, CSV batch comparison, visualization graphs
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+## Quick Start
+
+```python
+from image_quality_analyzer import ImageQualityAnalyzer, load_default_config
+
+# Load default configuration
+config = load_default_config()
+
+# Initialize analyzer
+analyzer = ImageQualityAnalyzer(config)
+
+# Analyze an image
+result = analyzer.analyze_image("path/to/document.jpg")
+
+# Generate visualizations
+analyzer.generate_graphs(result, output_dir="graphs/")
+
+# Export report
+analyzer.export_json_report(result, "report.json")
+```
+
+## Configuration
+
+The system uses JSON-based configuration for all parameters:
+
+```json
+{
+  "resolution": {
+    "min_dpi_text": 300,
+    "min_dpi_archival": 400
+  },
+  "exposure": {
+    "max_shadow_clip_pct": 0.5,
+    "max_highlight_clip_pct": 0.5,
+    "illumination_uniformity_warn": 0.15,
+    "illumination_uniformity_fail": 0.25
+  },
+  // ... more parameters
+}
+```
+
+## Usage Examples
+
+### Single Image Analysis
+```python
+result = analyzer.analyze_image("document.jpg")
+print(f"Overall score: {result['global']['score']:.2f}")
+print(f"Stars: {'★' * result['global']['stars']}{'☆' * (4 - result['global']['stars'])}")
+```
+
+### Batch Processing
+```python
+results = analyzer.analyze_batch(["img1.jpg", "img2.jpg", "img3.jpg"])
+analyzer.export_csv_comparison(results, "batch_report.csv")
+```
+
+## License
+
+Free to use and modify. Based on general imaging science principles and open guidelines.
