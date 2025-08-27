@@ -598,29 +598,29 @@ class ProfessionalDesktopImageQualityAnalyzer:
         # Accent button (primary action)
         style.configure('Accent.TButton', 
                        font=('Segoe UI', 10, 'bold'),
-                       foreground='white',
+                       foreground='#2c3e50',
                        focuscolor='none')
         style.map('Accent.TButton', 
                  background=[('active', '#3498db'), ('!active', '#2980b9')],
-                 foreground=[('active', 'white'), ('!active', 'white')])
+                 foreground=[('active', '#2c3e50'), ('!active', '#2c3e50')])
         
         # Success button
         style.configure('Success.TButton',
                        font=('Segoe UI', 10),
-                       foreground='white',
+                       foreground='#2c3e50',
                        focuscolor='none')
         style.map('Success.TButton',
                  background=[('active', '#27ae60'), ('!active', '#2ecc71')],
-                 foreground=[('active', 'white'), ('!active', 'white')])
+                 foreground=[('active', '#2c3e50'), ('!active', '#2c3e50')])
         
         # Warning button
         style.configure('Warning.TButton',
                        font=('Segoe UI', 10),
-                       foreground='white',
+                       foreground='#2c3e50',
                        focuscolor='none')
         style.map('Warning.TButton',
                  background=[('active', '#f39c12'), ('!active', '#e67e22')],
-                 foreground=[('active', 'white'), ('!active', 'white')])
+                 foreground=[('active', '#2c3e50'), ('!active', '#2c3e50')])
         
         # Configure notebook tabs
         style.configure('TNotebook.Tab', padding=[15, 8])
@@ -1000,40 +1000,83 @@ class ProfessionalDesktopImageQualityAnalyzer:
         self.run_batch_analysis(image_files, folder_path)
         
     def run_batch_analysis(self, image_files, output_folder):
-        """Run batch analysis in background thread"""
+        """Run batch analysis in background thread with detailed error tracking"""
         def batch_worker():
             try:
-                results = []
+                successful_results = []
+                failed_results = []
                 total_files = len(image_files)
                 
                 for i, image_path in enumerate(image_files):
-                    self.root.after(0, lambda p=i/total_files: self.progress_bar.configure(value=p*100))
-                    self.root.after(0, lambda: self.progress_var.set(f"Processing {os.path.basename(image_path)}..."))
+                    progress = (i / total_files) * 100
+                    filename = os.path.basename(image_path)
+                    
+                    self.root.after(0, lambda p=progress: self.progress_bar.configure(value=p))
+                    self.root.after(0, lambda f=filename: self.progress_var.set(f"Processing {f}..."))
                     
                     try:
+                        # Try to analyze the image
                         result = self.analyzer.analyze_image(image_path, self.current_config)
-                        results.append({
-                            'file': os.path.basename(image_path),
-                            'path': image_path,
+                        successful_results.append({
+                            'filename': filename,
+                            'filepath': image_path,
                             'results': result
                         })
+                        print(f"✅ Successfully analyzed: {filename}")
+                        
                     except Exception as e:
-                        results.append({
-                            'file': os.path.basename(image_path),
-                            'path': image_path,
-                            'error': str(e)
+                        # Detailed error categorization
+                        error_type = type(e).__name__
+                        error_message = str(e)
+                        
+                        # Categorize common errors
+                        if "could not load" in error_message.lower() or "cannot identify image file" in error_message.lower():
+                            analysis_type = "Image Loading"
+                            error_reason = "File format not supported or corrupted"
+                        elif "permission" in error_message.lower():
+                            analysis_type = "File Access"
+                            error_reason = "Permission denied or file in use"
+                        elif "memory" in error_message.lower():
+                            analysis_type = "Memory"
+                            error_reason = "Insufficient memory to process large image"
+                        elif "cv2" in error_message.lower():
+                            analysis_type = "Image Processing"
+                            error_reason = "OpenCV processing error"
+                        elif "shape" in error_message.lower():
+                            analysis_type = "Image Dimensions"
+                            error_reason = "Invalid or unexpected image dimensions"
+                        else:
+                            analysis_type = "General Analysis"
+                            error_reason = f"{error_type}: {error_message}"
+                        
+                        failed_results.append({
+                            'filename': filename,
+                            'filepath': image_path,
+                            'analysis_type': analysis_type,
+                            'error_type': error_type,
+                            'error_message': error_message,
+                            'error_reason': error_reason,
+                            'timestamp': datetime.now().isoformat()
                         })
+                        print(f"❌ Failed to analyze: {filename} - {error_reason}")
                 
-                # Save batch results
+                # Generate comprehensive Excel report with error tracking
+                self.root.after(0, lambda: self.progress_var.set("Generating Excel report..."))
+                excel_path = self.create_batch_excel_report(successful_results, failed_results, output_folder)
+                
+                # Also save JSON backup
                 batch_report_path = os.path.join(output_folder, "batch_analysis_report.json")
                 with open(batch_report_path, 'w') as f:
                     json.dump({
                         'timestamp': datetime.now().isoformat(),
                         'total_images': total_files,
-                        'results': results
+                        'successful_count': len(successful_results),
+                        'failed_count': len(failed_results),
+                        'successful_results': successful_results,
+                        'failed_results': failed_results
                     }, f, indent=2, default=str)
                 
-                self.root.after(0, lambda: self.batch_analysis_complete(batch_report_path, len(results)))
+                self.root.after(0, lambda: self.batch_analysis_complete(excel_path, len(successful_results), len(failed_results)))
                 
             except Exception as e:
                 self.root.after(0, lambda: self.analysis_error(f"Batch analysis failed: {e}"))
@@ -1045,20 +1088,1138 @@ class ProfessionalDesktopImageQualityAnalyzer:
         thread = threading.Thread(target=batch_worker, daemon=True)
         thread.start()
         
-    def batch_analysis_complete(self, report_path, total_analyzed):
-        """Handle batch analysis completion"""
+    def batch_analysis_complete(self, excel_path, successful_count, failed_count):
+        """Handle batch analysis completion with detailed statistics"""
         self.progress_bar.configure(value=100)
         self.progress_var.set("Batch analysis complete!")
         
-        messagebox.showinfo(
-            "Batch Analysis Complete",
-            f"Successfully analyzed {total_analyzed} images.\n"
-            f"Report saved to: {report_path}"
-        )
+        total_count = successful_count + failed_count
+        success_rate = (successful_count / total_count) * 100 if total_count > 0 else 0
+        
+        # Detailed completion message
+        message = f"Batch Analysis Complete!\n\n"
+        message += f"📊 Total Images: {total_count}\n"
+        message += f"✅ Successfully Analyzed: {successful_count}\n"
+        message += f"❌ Failed Analysis: {failed_count}\n"
+        message += f"📈 Success Rate: {success_rate:.1f}%\n\n"
+        message += f"📋 Excel Report: {os.path.basename(excel_path)}"
+        
+        if failed_count > 0:
+            message += f"\n\n⚠️ Check the 'Failed Files' tab in the Excel report for details on failures."
+        
+        messagebox.showinfo("Batch Analysis Complete", message)
+        
+        # Open the Excel report
+        try:
+            if os.path.exists(excel_path):
+                os.startfile(excel_path)
+                print(f"📊 Opened batch Excel report: {excel_path}")
+        except Exception as e:
+            print(f"Could not open Excel file: {e}")
         
         # Reset progress
         self.progress_bar.configure(mode='indeterminate', value=0)
         self.progress_var.set("Ready for analysis")
+    
+    def create_batch_excel_report(self, successful_results, failed_results, output_folder):
+        """Create comprehensive Excel report for batch analysis with error tracking"""
+        try:
+            import pandas as pd
+            import xlsxwriter
+            
+            # Generate filename for batch report
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            folder_name = os.path.basename(output_folder)
+            excel_filename = f"{folder_name}_BatchAnalysis_{timestamp}.xlsx"
+            excel_filepath = os.path.join(output_folder, excel_filename)
+            
+            print(f"📊 Creating batch Excel report: {excel_filename}")
+            
+            # Create Excel writer
+            with pd.ExcelWriter(excel_filepath, engine='xlsxwriter') as writer:
+                workbook = writer.book
+                
+                # Define professional formats
+                header_format = workbook.add_format({
+                    'bold': True,
+                    'font_size': 14,
+                    'bg_color': '#2c5aa0',
+                    'font_color': 'white',
+                    'align': 'center',
+                    'valign': 'vcenter',
+                    'border': 1
+                })
+                
+                title_format = workbook.add_format({
+                    'bold': True,
+                    'font_size': 16,
+                    'bg_color': '#1a252f',
+                    'font_color': 'white',
+                    'align': 'center',
+                    'valign': 'vcenter'
+                })
+                
+                success_format = workbook.add_format({
+                    'bg_color': '#d4edda',
+                    'font_color': '#155724',
+                    'align': 'center'
+                })
+                
+                fail_format = workbook.add_format({
+                    'bg_color': '#f8d7da',
+                    'font_color': '#721c24',
+                    'align': 'center'
+                })
+                
+                warning_format = workbook.add_format({
+                    'bg_color': '#fff3cd',
+                    'font_color': '#856404',
+                    'align': 'center'
+                })
+                
+                # 1. BATCH SUMMARY SHEET
+                self.create_batch_summary_sheet(writer, workbook, successful_results, failed_results, 
+                                              title_format, header_format, success_format, fail_format)
+                
+                # 2. SUCCESSFUL ANALYSIS SHEET
+                if successful_results:
+                    self.create_batch_success_sheet(writer, workbook, successful_results, 
+                                                  title_format, header_format, success_format, warning_format, fail_format)
+                
+                # 3. DETAILED METRICS SHEET - Raw numerical data
+                if successful_results:
+                    self.create_detailed_metrics_sheet(writer, workbook, successful_results, 
+                                                     title_format, header_format, success_format, warning_format, fail_format)
+                
+                # 4. RAW MEASUREMENTS SHEET - All raw values
+                if successful_results:
+                    self.create_raw_measurements_sheet(writer, workbook, successful_results, 
+                                                     title_format, header_format)
+                
+                # 5. TECHNICAL ANALYSIS SHEET - Advanced metrics
+                if successful_results:
+                    self.create_technical_analysis_sheet(writer, workbook, successful_results, 
+                                                        title_format, header_format)
+                
+                # 6. QUALITY BREAKDOWN SHEET - Category deep dive
+                if successful_results:
+                    self.create_quality_breakdown_sheet(writer, workbook, successful_results, 
+                                                       title_format, header_format, success_format, warning_format, fail_format)
+                
+                # NEW: Color coding explanation sheet
+                self.create_color_coding_guide_sheet(writer, workbook, title_format, header_format, 
+                                                   success_format, warning_format, fail_format)
+                
+                # 7. FAILED FILES SHEET (The key feature you requested!)
+                if failed_results:
+                    self.create_batch_failed_sheet(writer, workbook, failed_results, 
+                                                 title_format, header_format, fail_format)
+                
+                # 8. STATISTICS SHEET
+                self.create_batch_statistics_sheet(writer, workbook, successful_results, failed_results,
+                                                 title_format, header_format, success_format, fail_format)
+            
+            return excel_filepath
+            
+        except ImportError:
+            print("⚠️ Installing required packages for batch Excel export...")
+            self.install_batch_excel_packages()
+            return self.create_batch_excel_report(successful_results, failed_results, output_folder)
+        except Exception as e:
+            print(f"Error creating batch Excel report: {e}")
+            return None
+    
+    def create_batch_failed_sheet(self, writer, workbook, failed_results, title_format, header_format, fail_format):
+        """Create Failed Files sheet with detailed error information"""
+        import pandas as pd
+        
+        if not failed_results:
+            return
+        
+        # Prepare failed files data
+        failed_data = []
+        for failure in failed_results:
+            failed_data.append({
+                'File Name': failure['filename'],
+                'Analysis Type': failure['analysis_type'],
+                'Error Type': failure['error_type'],
+                'Error Reason': failure['error_reason'],
+                'Full Path': failure['filepath'],
+                'Timestamp': failure['timestamp']
+            })
+        
+        # Create DataFrame
+        failed_df = pd.DataFrame(failed_data)
+        
+        # Write to Excel
+        failed_df.to_excel(writer, sheet_name='Failed Files', index=False, startrow=2)
+        
+        # Get worksheet
+        worksheet = writer.sheets['Failed Files']
+        
+        # Add title
+        worksheet.merge_range('A1:F1', '❌ FAILED FILES - DETAILED ERROR REPORT', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(failed_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Set column widths
+        worksheet.set_column('A:A', 25)  # File Name
+        worksheet.set_column('B:B', 20)  # Analysis Type
+        worksheet.set_column('C:C', 15)  # Error Type
+        worksheet.set_column('D:D', 40)  # Error Reason
+        worksheet.set_column('E:E', 50)  # Full Path
+        worksheet.set_column('F:F', 20)  # Timestamp
+        
+        # Apply formatting to all data rows
+        for row in range(2, len(failed_data) + 2):
+            for col in range(6):
+                worksheet.write(row, col, failed_df.iloc[row-2, col], fail_format)
+        
+        print(f"📊 Created Failed Files sheet with {len(failed_data)} entries")
+    
+    def create_batch_summary_sheet(self, writer, workbook, successful_results, failed_results, 
+                                  title_format, header_format, success_format, fail_format):
+        """Create batch analysis summary sheet"""
+        import pandas as pd
+        
+        total_count = len(successful_results) + len(failed_results)
+        success_rate = (len(successful_results) / total_count) * 100 if total_count > 0 else 0
+        
+        summary_data = {
+            'Metric': [
+                'Total Images Processed',
+                'Successfully Analyzed',
+                'Failed Analysis',
+                'Success Rate',
+                'Analysis Date',
+                'Analysis Time'
+            ],
+            'Value': [
+                total_count,
+                len(successful_results),
+                len(failed_results),
+                f"{success_rate:.1f}%",
+                datetime.now().strftime("%Y-%m-%d"),
+                datetime.now().strftime("%H:%M:%S")
+            ]
+        }
+        
+        summary_df = pd.DataFrame(summary_data)
+        summary_df.to_excel(writer, sheet_name='Batch Summary', index=False, startrow=2)
+        
+        worksheet = writer.sheets['Batch Summary']
+        worksheet.merge_range('A1:B1', '📊 BATCH ANALYSIS SUMMARY', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(summary_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Set column widths
+        worksheet.set_column('A:A', 25)
+        worksheet.set_column('B:B', 20)
+        
+        # Apply conditional formatting
+        for row in range(2, len(summary_data['Metric']) + 2):
+            metric = summary_df.iloc[row-2, 0]
+            if 'Success' in metric:
+                worksheet.write(row, 1, summary_df.iloc[row-2, 1], success_format)
+            elif 'Failed' in metric:
+                worksheet.write(row, 1, summary_df.iloc[row-2, 1], fail_format)
+    
+    def create_batch_success_sheet(self, writer, workbook, successful_results, title_format, 
+                                  header_format, success_format, warning_format, fail_format):
+        """Create successful analysis summary sheet"""
+        import pandas as pd
+        
+        success_data = []
+        
+        for result in successful_results:
+            filename = result['filename']
+            analysis = result['results']
+            global_info = analysis.get('global', {})
+            
+            success_data.append({
+                'File Name': filename,
+                'Overall Score': f"{global_info.get('score', 0):.3f}",
+                'Status': global_info.get('status', 'Unknown').upper(),
+                'Stars': f"{global_info.get('stars', 0)} out of 4",
+                'Critical Issues': 'Yes' if global_info.get('critical_fail', False) else 'No',
+                'Recommendations': len(global_info.get('actions', []))
+            })
+        
+        success_df = pd.DataFrame(success_data)
+        success_df.to_excel(writer, sheet_name='Successful Analysis', index=False, startrow=2)
+        
+        worksheet = writer.sheets['Successful Analysis']
+        worksheet.merge_range('A1:F1', '✅ SUCCESSFUL ANALYSIS RESULTS', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(success_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Set column widths
+        worksheet.set_column('A:A', 25)  # File Name
+        worksheet.set_column('B:B', 15)  # Overall Score
+        worksheet.set_column('C:C', 15)  # Status
+        worksheet.set_column('D:D', 15)  # Stars
+        worksheet.set_column('E:E', 15)  # Critical Issues
+        worksheet.set_column('F:F', 15)  # Recommendations
+        
+        # Apply conditional formatting based on status
+        for row in range(3, len(success_data) + 3):  # Start from row 3 now
+            status = success_df.iloc[row-3]['Status']
+            critical = success_df.iloc[row-3]['Critical Issues']
+            
+            if status == 'EXCELLENT':
+                format_to_use = success_format
+            elif status in ['FAIL', 'POOR'] or critical == 'Yes':
+                format_to_use = fail_format
+            else:
+                format_to_use = warning_format
+            
+            for col in range(6):
+                worksheet.write(row-1, col, success_df.iloc[row-3, col], format_to_use)
+    
+    def create_batch_statistics_sheet(self, writer, workbook, successful_results, failed_results,
+                                     title_format, header_format, success_format, fail_format):
+        """Create statistics and trends sheet"""
+        import pandas as pd
+        
+        # Error type statistics
+        error_types = {}
+        analysis_types = {}
+        
+        for failure in failed_results:
+            error_type = failure['error_type']
+            analysis_type = failure['analysis_type']
+            
+            error_types[error_type] = error_types.get(error_type, 0) + 1
+            analysis_types[analysis_type] = analysis_types.get(analysis_type, 0) + 1
+        
+        # Create error statistics table
+        if failed_results:
+            error_stats_data = []
+            for error_type, count in sorted(error_types.items(), key=lambda x: x[1], reverse=True):
+                percentage = (count / len(failed_results)) * 100
+                error_stats_data.append({
+                    'Error Type': error_type,
+                    'Count': count,
+                    'Percentage': f"{percentage:.1f}%"
+                })
+            
+            error_df = pd.DataFrame(error_stats_data)
+            error_df.to_excel(writer, sheet_name='Statistics', index=False, startrow=2)
+            
+            worksheet = writer.sheets['Statistics']
+            worksheet.merge_range('A1:C1', '📈 ERROR STATISTICS', title_format)
+            
+            # Add proper headers with formatting
+            for col_num, column_title in enumerate(error_df.columns):
+                worksheet.write(1, col_num, column_title, header_format)
+            
+            # Analysis type breakdown
+            if len(analysis_types) > 1:
+                analysis_stats_data = []
+                for analysis_type, count in sorted(analysis_types.items(), key=lambda x: x[1], reverse=True):
+                    percentage = (count / len(failed_results)) * 100
+                    analysis_stats_data.append({
+                        'Analysis Type': analysis_type,
+                        'Failure Count': count,
+                        'Failure Rate': f"{percentage:.1f}%"
+                    })
+                
+                analysis_df = pd.DataFrame(analysis_stats_data)
+                start_row = len(error_stats_data) + 4
+                analysis_df.to_excel(writer, sheet_name='Statistics', index=False, startrow=start_row)
+                
+                worksheet.merge_range(f'A{start_row}:C{start_row}', '🔍 ANALYSIS TYPE BREAKDOWN', title_format)
+        
+        print(f"📊 Created Statistics sheet with error analysis")
+    
+    def create_detailed_metrics_sheet(self, writer, workbook, successful_results, title_format, 
+                                     header_format, success_format, warning_format, fail_format):
+        """Create detailed metrics sheet with comprehensive numerical data"""
+        import pandas as pd
+        
+        detailed_data = []
+        
+        for result in successful_results:
+            filename = result['filename']
+            analysis = result['results']
+            metrics = analysis.get('metrics', {})
+            global_info = analysis.get('global', {})
+            category_status = analysis.get('category_status', {})
+            
+            # Build comprehensive row with all key metrics
+            row_data = {
+                'File Name': filename,
+                'Overall Score': global_info.get('score', 0),
+                'Quality Stars': global_info.get('stars', 0),
+                'Status': global_info.get('status', 'Unknown').upper(),
+                'Critical Issues': 'Yes' if global_info.get('critical_fail', False) else 'No',
+                
+                # Sharpness metrics
+                'Laplacian Variance': metrics.get('sharpness', {}).get('laplacian_var', 0),
+                'Gradient Magnitude': metrics.get('sharpness', {}).get('gradient_magnitude_mean', 0),
+                'Edge Density': metrics.get('sharpness', {}).get('edge_density', 0),
+                'High Freq Energy': metrics.get('sharpness', {}).get('frequency_metrics', {}).get('high_freq_energy', 0),
+                'Sharpness Status': category_status.get('sharpness', 'Unknown').upper(),
+                
+                # Exposure metrics
+                'Shadow Clip %': metrics.get('exposure', {}).get('clipping', {}).get('shadow_clip_pct', 0),
+                'Highlight Clip %': metrics.get('exposure', {}).get('clipping', {}).get('highlight_clip_pct', 0),
+                'Brightness Mean': metrics.get('exposure', {}).get('brightness', {}).get('mean', 0),
+                'Brightness Std': metrics.get('exposure', {}).get('brightness', {}).get('std', 0),
+                'Dynamic Range': metrics.get('exposure', {}).get('dynamic_range', {}).get('effective_range', 0),
+                'Illumination Uniformity': metrics.get('exposure', {}).get('illumination_uniformity', {}).get('uniformity_ratio', 0),
+                'Background Median': metrics.get('exposure', {}).get('background', {}).get('median', 0),
+                'Exposure Status': category_status.get('exposure', 'Unknown').upper(),
+                
+                # Contrast metrics
+                'Global Contrast': metrics.get('contrast', {}).get('global_contrast', 0),
+                'RMS Contrast': metrics.get('contrast', {}).get('rms_contrast', 0),
+                'Local Contrast Mean': metrics.get('contrast', {}).get('local_contrast', {}).get('mean', 0),
+                'Local Contrast Std': metrics.get('contrast', {}).get('local_contrast', {}).get('std', 0),
+                'Contrast Status': category_status.get('contrast', 'Unknown').upper(),
+                
+                # Geometry metrics
+                'Skew Angle (abs)': metrics.get('geometry', {}).get('skew_angle_abs', 0),
+                'Warp Index': metrics.get('geometry', {}).get('warp_index', 0),
+                'Aspect Ratio': metrics.get('geometry', {}).get('orientation', {}).get('aspect_ratio', 0),
+                'Line Angle Std': metrics.get('geometry', {}).get('line_angles', {}).get('angle_std', 0),
+                'Geometry Status': category_status.get('geometry', 'Unknown').upper(),
+                
+                # Resolution metrics
+                'DPI X': metrics.get('resolution', {}).get('effective_dpi_x', 0),
+                'DPI Y': metrics.get('resolution', {}).get('effective_dpi_y', 0),
+                'Width (px)': metrics.get('resolution', {}).get('pixel_width', 0),
+                'Height (px)': metrics.get('resolution', {}).get('pixel_height', 0),
+                'Megapixels': metrics.get('resolution', {}).get('megapixels', 0),
+                'Resolution Status': category_status.get('resolution', 'Unknown').upper(),
+                
+                # Border/Background metrics
+                'Left Margin %': metrics.get('border_background', {}).get('left_margin_ratio', 0) * 100,
+                'Right Margin %': metrics.get('border_background', {}).get('right_margin_ratio', 0) * 100,
+                'Top Margin %': metrics.get('border_background', {}).get('top_margin_ratio', 0) * 100,
+                'Bottom Margin %': metrics.get('border_background', {}).get('bottom_margin_ratio', 0) * 100,
+                'BG Luminance': metrics.get('border_background', {}).get('bg_median_lum', 0),
+                'BG Noise Std': metrics.get('noise', {}).get('bg_noise_std', 0),
+                'Border Status': category_status.get('border_background', 'Unknown').upper(),
+                
+                # Completeness metrics
+                'Content Coverage': metrics.get('completeness', {}).get('content_bbox_coverage', 0),
+                'Edge Touch': 'Yes' if metrics.get('completeness', {}).get('edge_touch_flag', False) else 'No',
+                'Left Margin (px)': metrics.get('completeness', {}).get('margins', {}).get('left_px', 0),
+                'Right Margin (px)': metrics.get('completeness', {}).get('margins', {}).get('right_px', 0),
+                'Top Margin (px)': metrics.get('completeness', {}).get('margins', {}).get('top_px', 0),
+                'Bottom Margin (px)': metrics.get('completeness', {}).get('margins', {}).get('bottom_px', 0),
+                'Completeness Status': category_status.get('completeness', 'Unknown').upper(),
+                
+                # Color metrics
+                'Hue Cast (degrees)': metrics.get('color', {}).get('hue_cast_degrees', 0),
+                'Gray Delta E': metrics.get('color', {}).get('gray_deltaE', 0) if metrics.get('color', {}).get('gray_deltaE') is not None else 0,
+                'Color Status': category_status.get('color', 'Unknown').upper(),
+                
+                # Format metrics
+                'Format': metrics.get('format_integrity', {}).get('format_name', 'Unknown'),
+                'Bit Depth': metrics.get('format_integrity', {}).get('bit_depth', 0),
+                'JPEG Quality': metrics.get('format_integrity', {}).get('jpeg_quality', 0) if metrics.get('format_integrity', {}).get('jpeg_quality') is not None else 'N/A',
+                'Format Status': category_status.get('format_integrity', 'Unknown').upper(),
+                
+                # Foreign objects
+                'Foreign Objects': 'Yes' if metrics.get('foreign_objects', {}).get('foreign_object_flag', False) else 'No',
+                'Foreign Area %': metrics.get('foreign_objects', {}).get('foreign_object_area_pct', 0),
+            }
+            
+            detailed_data.append(row_data)
+        
+        # Create DataFrame and write to Excel
+        detailed_df = pd.DataFrame(detailed_data)
+        detailed_df.to_excel(writer, sheet_name='Detailed Metrics', index=False, startrow=2)
+        
+        worksheet = writer.sheets['Detailed Metrics']
+        
+        # Calculate the end column letter properly for merge range  
+        end_col_index = len(detailed_df.columns) - 1
+        if end_col_index > 25:
+            # For very wide tables, use a safe range
+            worksheet.merge_range('A1:Z1', '📊 DETAILED METRICS & MEASUREMENTS', title_format)
+        else:
+            end_col_letter = chr(65 + end_col_index)
+            worksheet.merge_range(f'A1:{end_col_letter}1', '📊 DETAILED METRICS & MEASUREMENTS', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(detailed_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Apply conditional formatting based on status columns
+        for idx, row in enumerate(detailed_data, start=3):  # Start from row 3 now
+            overall_status = row['Status']
+            critical = row['Critical Issues']
+            
+            if overall_status == 'EXCELLENT':
+                format_to_use = success_format
+            elif overall_status in ['FAIL', 'POOR'] or critical == 'Yes':
+                format_to_use = fail_format
+            else:
+                format_to_use = warning_format
+            
+            # Apply format to the entire row
+            for col in range(len(detailed_df.columns)):
+                worksheet.write(idx-1, col, detailed_df.iloc[idx-3, col], format_to_use)
+        
+        # Set column widths
+        for i, col in enumerate(detailed_df.columns):
+            worksheet.set_column(i, i, 15)
+        
+        print(f"📊 Created Detailed Metrics sheet with {len(detailed_data)} files and {len(detailed_df.columns)} metrics")
+    
+    def create_raw_measurements_sheet(self, writer, workbook, successful_results, title_format, header_format):
+        """Create raw measurements sheet with all numerical values"""
+        import pandas as pd
+        
+        raw_data = []
+        
+        for result in successful_results:
+            filename = result['filename']
+            analysis = result['results']
+            metrics = analysis.get('metrics', {})
+            
+            # Extract all raw numerical measurements
+            row_data = {'File Name': filename}
+            
+            # Sharpness raw data
+            sharpness = metrics.get('sharpness', {})
+            row_data.update({
+                'Sharp_Laplacian_Var': sharpness.get('laplacian_var', 0),
+                'Sharp_Gradient_Mean': sharpness.get('gradient_magnitude_mean', 0),
+                'Sharp_Edge_Density': sharpness.get('edge_density', 0),
+                'Sharp_Local_Mean': sharpness.get('local_sharpness', {}).get('mean', 0),
+                'Sharp_Local_Std': sharpness.get('local_sharpness', {}).get('std', 0),
+                'Sharp_Local_Min': sharpness.get('local_sharpness', {}).get('min', 0),
+                'Sharp_Local_Max': sharpness.get('local_sharpness', {}).get('max', 0),
+                'Sharp_P10': sharpness.get('local_sharpness', {}).get('percentiles', {}).get('p10', 0),
+                'Sharp_P25': sharpness.get('local_sharpness', {}).get('percentiles', {}).get('p25', 0),
+                'Sharp_P50': sharpness.get('local_sharpness', {}).get('percentiles', {}).get('p50', 0),
+                'Sharp_P75': sharpness.get('local_sharpness', {}).get('percentiles', {}).get('p75', 0),
+                'Sharp_P90': sharpness.get('local_sharpness', {}).get('percentiles', {}).get('p90', 0),
+                'Sharp_High_Freq': sharpness.get('frequency_metrics', {}).get('high_freq_energy', 0),
+                'Sharp_Mid_Freq': sharpness.get('frequency_metrics', {}).get('mid_freq_energy', 0),
+                'Sharp_Low_Freq': sharpness.get('frequency_metrics', {}).get('low_freq_energy', 0),
+                'Sharp_Spectral_Centroid': sharpness.get('frequency_metrics', {}).get('spectral_centroid', 0),
+            })
+            
+            # Exposure raw data
+            exposure = metrics.get('exposure', {})
+            row_data.update({
+                'Exp_Shadow_Clip_Pct': exposure.get('clipping', {}).get('shadow_clip_pct', 0),
+                'Exp_Highlight_Clip_Pct': exposure.get('clipping', {}).get('highlight_clip_pct', 0),
+                'Exp_Shadow_Pixels': exposure.get('clipping', {}).get('shadow_clipped_pixels', 0),
+                'Exp_Highlight_Pixels': exposure.get('clipping', {}).get('highlight_clipped_pixels', 0),
+                'Exp_Total_Pixels': exposure.get('clipping', {}).get('total_pixels', 0),
+                'Exp_Uniformity_Ratio': exposure.get('illumination_uniformity', {}).get('uniformity_ratio', 0),
+                'Exp_Local_Std': exposure.get('illumination_uniformity', {}).get('local_std', 0),
+                'Exp_Local_Mean': exposure.get('illumination_uniformity', {}).get('local_mean', 0),
+                'Exp_Coeff_Variation': exposure.get('illumination_uniformity', {}).get('coefficient_of_variation', 0),
+                'Exp_Tiles_Analyzed': exposure.get('illumination_uniformity', {}).get('num_tiles_analyzed', 0),
+                'Exp_Bright_Mean': exposure.get('brightness', {}).get('mean', 0),
+                'Exp_Bright_Median': exposure.get('brightness', {}).get('median', 0),
+                'Exp_Bright_Std': exposure.get('brightness', {}).get('std', 0),
+                'Exp_Bright_Min': exposure.get('brightness', {}).get('min', 0),
+                'Exp_Bright_Max': exposure.get('brightness', {}).get('max', 0),
+                'Exp_Bright_P5': exposure.get('brightness', {}).get('percentiles', {}).get('p5', 0),
+                'Exp_Bright_P10': exposure.get('brightness', {}).get('percentiles', {}).get('p10', 0),
+                'Exp_Bright_P25': exposure.get('brightness', {}).get('percentiles', {}).get('p25', 0),
+                'Exp_Bright_P75': exposure.get('brightness', {}).get('percentiles', {}).get('p75', 0),
+                'Exp_Bright_P90': exposure.get('brightness', {}).get('percentiles', {}).get('p90', 0),
+                'Exp_Bright_P95': exposure.get('brightness', {}).get('percentiles', {}).get('p95', 0),
+                'Exp_Dynamic_Effective': exposure.get('dynamic_range', {}).get('effective_range', 0),
+                'Exp_Dynamic_Full': exposure.get('dynamic_range', {}).get('full_range', 0),
+                'Exp_Dynamic_Utilization': exposure.get('dynamic_range', {}).get('utilization', 0),
+                'Exp_BG_Median': exposure.get('background', {}).get('median', 0),
+                'Exp_BG_Mean': exposure.get('background', {}).get('mean', 0),
+                'Exp_BG_Std': exposure.get('background', {}).get('std', 0),
+                'Exp_BG_Max': exposure.get('background', {}).get('max', 0),
+                'Exp_BG_Pixel_Count': exposure.get('background', {}).get('pixel_count', 0),
+            })
+            
+            # Contrast raw data
+            contrast = metrics.get('contrast', {})
+            row_data.update({
+                'Con_Global': contrast.get('global_contrast', 0),
+                'Con_RMS': contrast.get('rms_contrast', 0),
+                'Con_P5': contrast.get('percentiles', {}).get('p5', 0),
+                'Con_P95': contrast.get('percentiles', {}).get('p95', 0),
+                'Con_Mean_Luminance': contrast.get('mean_luminance', 0),
+                'Con_Local_Mean': contrast.get('local_contrast', {}).get('mean', 0),
+                'Con_Local_Std': contrast.get('local_contrast', {}).get('std', 0),
+                'Con_Local_Min': contrast.get('local_contrast', {}).get('min', 0),
+                'Con_Local_Max': contrast.get('local_contrast', {}).get('max', 0),
+                'Con_Local_Tiles': contrast.get('local_contrast', {}).get('num_tiles', 0),
+            })
+            
+            # Geometry raw data
+            geometry = metrics.get('geometry', {})
+            row_data.update({
+                'Geo_Skew_Deg': geometry.get('skew_angle_deg', 0),
+                'Geo_Skew_Abs': geometry.get('skew_angle_abs', 0),
+                'Geo_Lines_Detected': geometry.get('line_angles', {}).get('detected_lines', 0),
+                'Geo_Angle_Std': geometry.get('line_angles', {}).get('angle_std', 0),
+                'Geo_Angle_Range': geometry.get('line_angles', {}).get('angle_range', 0),
+                'Geo_Warp_Index': geometry.get('warp_index', 0),
+                'Geo_Aspect_Ratio': geometry.get('orientation', {}).get('aspect_ratio', 0),
+                'Geo_Doc_Width': geometry.get('orientation', {}).get('doc_width_px', 0),
+                'Geo_Doc_Height': geometry.get('orientation', {}).get('doc_height_px', 0),
+            })
+            
+            # Border/Background raw data
+            border = metrics.get('border_background', {})
+            margins_px = border.get('margins_px', {})
+            row_data.update({
+                'Border_BG_Median': border.get('bg_median_lum', 0),
+                'Border_BG_Mean': border.get('bg_mean_lum', 0),
+                'Border_BG_Std': border.get('bg_std', 0),
+                'Border_Left_Ratio': border.get('left_margin_ratio', 0),
+                'Border_Right_Ratio': border.get('right_margin_ratio', 0),
+                'Border_Top_Ratio': border.get('top_margin_ratio', 0),
+                'Border_Bottom_Ratio': border.get('bottom_margin_ratio', 0),
+                'Border_Left_Px': margins_px.get('left', 0),
+                'Border_Right_Px': margins_px.get('right', 0),
+                'Border_Top_Px': margins_px.get('top', 0),
+                'Border_Bottom_Px': margins_px.get('bottom', 0),
+            })
+            
+            # Noise raw data
+            noise = metrics.get('noise', {})
+            row_data.update({
+                'Noise_BG_Std': noise.get('bg_noise_std', 0),
+                'Noise_Blockiness': noise.get('blockiness_index', 0),
+            })
+            
+            # Completeness raw data
+            completeness = metrics.get('completeness', {})
+            margins = completeness.get('margins', {})
+            bbox = completeness.get('document_bbox', {})
+            violations = completeness.get('edge_violations', {})
+            row_data.update({
+                'Comp_Coverage': completeness.get('content_bbox_coverage', 0),
+                'Comp_Edge_Touch': 1 if completeness.get('edge_touch_flag', False) else 0,
+                'Comp_Left_Px': margins.get('left_px', 0),
+                'Comp_Right_Px': margins.get('right_px', 0),
+                'Comp_Top_Px': margins.get('top_px', 0),
+                'Comp_Bottom_Px': margins.get('bottom_px', 0),
+                'Comp_Left_Violation': 1 if violations.get('left_violation', False) else 0,
+                'Comp_Right_Violation': 1 if violations.get('right_violation', False) else 0,
+                'Comp_Top_Violation': 1 if violations.get('top_violation', False) else 0,
+                'Comp_Bottom_Violation': 1 if violations.get('bottom_violation', False) else 0,
+                'Comp_BBox_X_Min': bbox.get('x_min', 0),
+                'Comp_BBox_Y_Min': bbox.get('y_min', 0),
+                'Comp_BBox_X_Max': bbox.get('x_max', 0),
+                'Comp_BBox_Y_Max': bbox.get('y_max', 0),
+                'Comp_BBox_Width': bbox.get('width', 0),
+                'Comp_BBox_Height': bbox.get('height', 0),
+                'Comp_BBox_Aspect': bbox.get('aspect_ratio', 0),
+            })
+            
+            # Resolution raw data
+            resolution = metrics.get('resolution', {})
+            row_data.update({
+                'Res_DPI_X': resolution.get('effective_dpi_x', 0),
+                'Res_DPI_Y': resolution.get('effective_dpi_y', 0),
+                'Res_Width_Px': resolution.get('pixel_width', 0),
+                'Res_Height_Px': resolution.get('pixel_height', 0),
+                'Res_Megapixels': resolution.get('megapixels', 0),
+            })
+            
+            # Color raw data
+            color = metrics.get('color', {})
+            row_data.update({
+                'Color_Hue_Cast': color.get('hue_cast_degrees', 0),
+                'Color_Gray_DeltaE': color.get('gray_deltaE', 0) if color.get('gray_deltaE') is not None else 0,
+                'Color_Enabled': 1 if color.get('enabled', False) else 0,
+            })
+            
+            # Format raw data
+            format_info = metrics.get('format_integrity', {})
+            row_data.update({
+                'Format_Bit_Depth': format_info.get('bit_depth', 0),
+                'Format_JPEG_Quality': format_info.get('jpeg_quality', 0) if format_info.get('jpeg_quality') is not None else 0,
+                'Format_Allowed': 1 if format_info.get('format_allowed', False) else 0,
+            })
+            
+            # Foreign objects raw data
+            foreign = metrics.get('foreign_objects', {})
+            row_data.update({
+                'Foreign_Flag': 1 if foreign.get('foreign_object_flag', False) else 0,
+                'Foreign_Area_Pct': foreign.get('foreign_object_area_pct', 0),
+            })
+            
+            raw_data.append(row_data)
+        
+        # Create DataFrame and write to Excel
+        raw_df = pd.DataFrame(raw_data)
+        raw_df.to_excel(writer, sheet_name='Raw Measurements', index=False, startrow=2)
+        
+        worksheet = writer.sheets['Raw Measurements']
+        
+        # Calculate the end column letter properly for merge range
+        end_col_index = len(raw_df.columns) - 1
+        if end_col_index > 25:
+            # For very wide tables, use a safe range
+            worksheet.merge_range('A1:Z1', '🔬 RAW MEASUREMENTS & TECHNICAL DATA', title_format)
+        else:
+            end_col_letter = chr(65 + end_col_index)
+            worksheet.merge_range(f'A1:{end_col_letter}1', '🔬 RAW MEASUREMENTS & TECHNICAL DATA', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(raw_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Set column widths
+        for i, col in enumerate(raw_df.columns):
+            if 'File' in col:
+                worksheet.set_column(i, i, 25)
+            else:
+                worksheet.set_column(i, i, 12)
+        
+        print(f"📊 Created Raw Measurements sheet with {len(raw_data)} files and {len(raw_df.columns)} raw measurements")
+    
+    def create_technical_analysis_sheet(self, writer, workbook, successful_results, title_format, header_format):
+        """Create technical analysis sheet with advanced computed metrics"""
+        import pandas as pd
+        
+        tech_data = []
+        
+        for result in successful_results:
+            filename = result['filename']
+            analysis = result['results']
+            metrics = analysis.get('metrics', {})
+            
+            # Compute advanced derived metrics
+            sharpness = metrics.get('sharpness', {})
+            exposure = metrics.get('exposure', {})
+            contrast = metrics.get('contrast', {})
+            geometry = metrics.get('geometry', {})
+            resolution = metrics.get('resolution', {})
+            
+            # Advanced calculations
+            laplacian = sharpness.get('laplacian_var', 0)
+            gradient = sharpness.get('gradient_magnitude_mean', 0)
+            sharpness_score = (laplacian / 1000) * (gradient / 100) if laplacian > 0 and gradient > 0 else 0
+            
+            dynamic_range = exposure.get('dynamic_range', {}).get('effective_range', 0)
+            brightness_std = exposure.get('brightness', {}).get('std', 0)
+            exposure_quality = dynamic_range * (1 - brightness_std) if brightness_std < 1 else 0
+            
+            global_contrast = contrast.get('global_contrast', 0)
+            local_contrast_mean = contrast.get('local_contrast', {}).get('mean', 0)
+            contrast_balance = abs(global_contrast - local_contrast_mean) if global_contrast > 0 and local_contrast_mean > 0 else 1
+            
+            skew_abs = geometry.get('skew_angle_abs', 0)
+            warp_index = geometry.get('warp_index', 0)
+            geometry_score = max(0, 1 - (skew_abs / 10) - (warp_index / 2))
+            
+            dpi_x = resolution.get('effective_dpi_x', 0)
+            dpi_y = resolution.get('effective_dpi_y', 0)
+            megapixels = resolution.get('megapixels', 0)
+            resolution_quality = min(dpi_x, dpi_y) / 300 * min(1, megapixels / 3) if dpi_x > 0 and dpi_y > 0 else 0
+            
+            row_data = {
+                'File Name': filename,
+                'Sharpness Score': round(sharpness_score, 4),
+                'Exposure Quality': round(exposure_quality, 4),
+                'Contrast Balance': round(contrast_balance, 4),
+                'Geometry Score': round(geometry_score, 4),
+                'Resolution Quality': round(resolution_quality, 4),
+                'Sharpness Category': 'Excellent' if laplacian > 500 else 'Good' if laplacian > 200 else 'Poor',
+                'Exposure Category': 'Excellent' if dynamic_range > 0.3 else 'Good' if dynamic_range > 0.15 else 'Poor',
+                'Contrast Category': 'Excellent' if global_contrast > 0.25 else 'Good' if global_contrast > 0.15 else 'Poor',
+                'Geometry Category': 'Excellent' if skew_abs < 1 else 'Good' if skew_abs < 3 else 'Poor',
+                'Resolution Category': 'Excellent' if min(dpi_x, dpi_y) >= 300 else 'Good' if min(dpi_x, dpi_y) >= 200 else 'Poor',
+                
+                # Technical ratios
+                'Freq High/Mid Ratio': round(sharpness.get('frequency_metrics', {}).get('high_freq_energy', 0) / 
+                                           max(sharpness.get('frequency_metrics', {}).get('mid_freq_energy', 0.001), 0.001), 4),
+                'Shadow/Highlight Ratio': round(exposure.get('clipping', {}).get('shadow_clip_pct', 0) / 
+                                               max(exposure.get('clipping', {}).get('highlight_clip_pct', 0.001), 0.001), 4),
+                'DPI Consistency': round(abs(dpi_x - dpi_y) / max(dpi_x, dpi_y, 1), 4),
+                'Aspect Stability': round(abs(geometry.get('orientation', {}).get('aspect_ratio', 1) - 1.414), 4),  # Distance from A4 ratio
+                
+                # Quality indicators
+                'Detail Preservation': 'High' if laplacian > 300 and gradient > 40 else 'Medium' if laplacian > 150 else 'Low',
+                'Illumination Quality': 'Uniform' if exposure.get('illumination_uniformity', {}).get('uniformity_ratio', 1) < 0.1 else 'Variable',
+                'Document Alignment': 'Aligned' if skew_abs < 1 else 'Slightly Skewed' if skew_abs < 3 else 'Skewed',
+                'Capture Completeness': 'Complete' if metrics.get('completeness', {}).get('content_bbox_coverage', 0) > 0.9 else 'Partial',
+                
+                # File characteristics
+                'File Size Category': 'Large' if megapixels > 5 else 'Medium' if megapixels > 2 else 'Small',
+                'Processing Complexity': 'High' if megapixels > 8 else 'Medium' if megapixels > 3 else 'Low',
+            }
+            
+            tech_data.append(row_data)
+        
+        # Create DataFrame and write to Excel
+        tech_df = pd.DataFrame(tech_data)
+        tech_df.to_excel(writer, sheet_name='Technical Analysis', index=False, startrow=2)
+        
+        worksheet = writer.sheets['Technical Analysis']
+        
+        # Calculate the end column letter properly for merge range
+        end_col_index = len(tech_df.columns) - 1
+        if end_col_index > 25:
+            worksheet.merge_range('A1:Z1', '⚙️ TECHNICAL ANALYSIS & COMPUTED METRICS', title_format)
+        else:
+            end_col_letter = chr(65 + end_col_index)
+            worksheet.merge_range(f'A1:{end_col_letter}1', '⚙️ TECHNICAL ANALYSIS & COMPUTED METRICS', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(tech_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Set column widths
+        for i, col in enumerate(tech_df.columns):
+            if 'File' in col:
+                worksheet.set_column(i, i, 25)
+            elif 'Category' in col or 'Quality' in col:
+                worksheet.set_column(i, i, 18)
+            else:
+                worksheet.set_column(i, i, 15)
+        
+        print(f"📊 Created Technical Analysis sheet with {len(tech_data)} files and advanced metrics")
+    
+    def create_quality_breakdown_sheet(self, writer, workbook, successful_results, title_format, 
+                                      header_format, success_format, warning_format, fail_format):
+        """Create quality breakdown sheet with category-by-category analysis"""
+        import pandas as pd
+        
+        breakdown_data = []
+        
+        for result in successful_results:
+            filename = result['filename']
+            analysis = result['results']
+            category_status = analysis.get('category_status', {})
+            metrics = analysis.get('metrics', {})
+            global_info = analysis.get('global', {})
+            
+            # Convert category status to scores for detailed breakdown
+            status_to_score = {'pass': 0.85, 'warn': 0.70, 'fail': 0.30, 'unknown': 0.50}
+            
+            row_data = {
+                'File Name': filename,
+                'Overall Score': global_info.get('score', 0),
+                'Overall Status': global_info.get('status', 'Unknown').upper(),
+                'Total Issues': len(global_info.get('actions', [])),
+                
+                # Individual category scores
+                'Completeness Score': status_to_score.get(category_status.get('completeness', 'unknown'), 0.5),
+                'Completeness Status': category_status.get('completeness', 'Unknown').upper(),
+                'Completeness Detail': f"Coverage: {metrics.get('completeness', {}).get('content_bbox_coverage', 0):.1%}",
+                
+                'Sharpness Score': status_to_score.get(category_status.get('sharpness', 'unknown'), 0.5),
+                'Sharpness Status': category_status.get('sharpness', 'Unknown').upper(),
+                'Sharpness Detail': f"Laplacian: {metrics.get('sharpness', {}).get('laplacian_var', 0):.1f}",
+                
+                'Exposure Score': status_to_score.get(category_status.get('exposure', 'unknown'), 0.5),
+                'Exposure Status': category_status.get('exposure', 'Unknown').upper(),
+                'Exposure Detail': f"Range: {metrics.get('exposure', {}).get('dynamic_range', {}).get('effective_range', 0):.3f}",
+                
+                'Contrast Score': status_to_score.get(category_status.get('contrast', 'unknown'), 0.5),
+                'Contrast Status': category_status.get('contrast', 'Unknown').upper(),
+                'Contrast Detail': f"Global: {metrics.get('contrast', {}).get('global_contrast', 0):.3f}",
+                
+                'Color Score': status_to_score.get(category_status.get('color', 'unknown'), 0.5),
+                'Color Status': category_status.get('color', 'Unknown').upper(),
+                'Color Detail': f"Hue Cast: {metrics.get('color', {}).get('hue_cast_degrees', 0):.1f}°",
+                
+                'Geometry Score': status_to_score.get(category_status.get('geometry', 'unknown'), 0.5),
+                'Geometry Status': category_status.get('geometry', 'Unknown').upper(),
+                'Geometry Detail': f"Skew: {metrics.get('geometry', {}).get('skew_angle_abs', 0):.1f}°",
+                
+                'Border Score': status_to_score.get(category_status.get('border_background', 'unknown'), 0.5),
+                'Border Status': category_status.get('border_background', 'Unknown').upper(),
+                'Border Detail': f"BG Lum: {metrics.get('border_background', {}).get('bg_median_lum', 0):.3f}",
+                
+                'Noise Score': status_to_score.get(category_status.get('noise', 'unknown'), 0.5),
+                'Noise Status': category_status.get('noise', 'Unknown').upper(),
+                'Noise Detail': f"BG Std: {metrics.get('noise', {}).get('bg_noise_std', 0):.4f}",
+                
+                'Format Score': status_to_score.get(category_status.get('format_integrity', 'unknown'), 0.5),
+                'Format Status': category_status.get('format_integrity', 'Unknown').upper(),
+                'Format Detail': f"{metrics.get('format_integrity', {}).get('format_name', 'Unknown')} - {metrics.get('format_integrity', {}).get('bit_depth', 0)}bit",
+                
+                'Resolution Score': status_to_score.get(category_status.get('resolution', 'unknown'), 0.5),
+                'Resolution Status': category_status.get('resolution', 'Unknown').upper(),
+                'Resolution Detail': f"{metrics.get('resolution', {}).get('effective_dpi_x', 0):.0f} DPI",
+                
+                # Problem indicators
+                'Critical Issues': 'Yes' if global_info.get('critical_fail', False) else 'No',
+                'Worst Category': min(category_status.keys(), key=lambda k: status_to_score.get(category_status.get(k, 'unknown'), 0.5)) if category_status else 'Unknown',
+                'Best Category': max(category_status.keys(), key=lambda k: status_to_score.get(category_status.get(k, 'unknown'), 0.5)) if category_status else 'Unknown',
+                'Pass Count': sum(1 for status in category_status.values() if status == 'pass'),
+                'Warn Count': sum(1 for status in category_status.values() if status == 'warn'),
+                'Fail Count': sum(1 for status in category_status.values() if status == 'fail'),
+            }
+            
+            breakdown_data.append(row_data)
+        
+        # Create DataFrame and write to Excel
+        breakdown_df = pd.DataFrame(breakdown_data)
+        breakdown_df.to_excel(writer, sheet_name='Quality Breakdown', index=False, startrow=2)
+        
+        worksheet = writer.sheets['Quality Breakdown']
+        
+        # Calculate the end column letter properly for merge range
+        end_col_index = len(breakdown_df.columns) - 1
+        if end_col_index > 25:
+            worksheet.merge_range('A1:Z1', '🎯 QUALITY BREAKDOWN BY CATEGORY', title_format)
+        else:
+            end_col_letter = chr(65 + end_col_index)
+            worksheet.merge_range(f'A1:{end_col_letter}1', '🎯 QUALITY BREAKDOWN BY CATEGORY', title_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(breakdown_df.columns):
+            worksheet.write(1, col_num, column_title, header_format)
+        
+        # Apply conditional formatting for status columns
+        for idx, row in enumerate(breakdown_data, start=3):  # Start from row 3 now
+            for col_name in breakdown_df.columns:
+                if 'Status' in col_name:
+                    status_value = row[col_name]
+                    col_idx = list(breakdown_df.columns).index(col_name)
+                    
+                    if status_value == 'PASS':
+                        format_to_use = success_format
+                    elif status_value == 'WARN':
+                        format_to_use = warning_format
+                    elif status_value == 'FAIL':
+                        format_to_use = fail_format
+                    else:
+                        format_to_use = None
+                    
+                    if format_to_use:
+                        worksheet.write(idx-1, col_idx, status_value, format_to_use)
+        
+        # Set column widths
+        for i, col in enumerate(breakdown_df.columns):
+            if 'File' in col:
+                worksheet.set_column(i, i, 25)
+            elif 'Detail' in col:
+                worksheet.set_column(i, i, 20)
+            else:
+                worksheet.set_column(i, i, 15)
+        
+        print(f"📊 Created Quality Breakdown sheet with {len(breakdown_data)} files and detailed category analysis")
+    
+    def create_color_coding_guide_sheet(self, writer, workbook, title_format, header_format, 
+                                       success_format, warning_format, fail_format):
+        """Create comprehensive color coding guide sheet"""
+        import pandas as pd
+        
+        # Color coding explanation data
+        guide_sections = [
+            {
+                'section': '🎨 COLOR CODING SYSTEM',
+                'description': 'Understanding the colors used throughout all Excel sheets',
+                'items': []
+            },
+            {
+                'section': '✅ GREEN (PASS/SUCCESS)',
+                'description': 'Indicates excellent performance and meeting quality standards',
+                'items': [
+                    ['Status Values', 'PASS, EXCELLENT, GOOD', 'Quality meets or exceeds standards'],
+                    ['Score Range', '0.80 - 1.00 (80% - 100%)', 'High quality measurements'],
+                    ['Examples', 'Sharp images, proper exposure, correct geometry', 'These images meet professional standards'],
+                    ['Action', 'No changes needed', 'Images are ready for use'],
+                    ['Background', 'Light green (#D4EDDA)', 'Easy visual identification of success']
+                ]
+            },
+            {
+                'section': '⚠️ YELLOW/ORANGE (WARN/CAUTION)',
+                'description': 'Indicates acceptable but improvable quality - attention recommended',
+                'items': [
+                    ['Status Values', 'WARN, FAIR, MEDIUM', 'Quality is acceptable but could be better'],
+                    ['Score Range', '0.65 - 0.79 (65% - 79%)', 'Moderate quality measurements'],
+                    ['Examples', 'Slight blur, minor exposure issues, small geometry problems', 'Usable but not optimal'],
+                    ['Action', 'Consider improvement if possible', 'Review capture settings or processing'],
+                    ['Background', 'Light yellow (#FFF3CD)', 'Caution indicator for attention']
+                ]
+            },
+            {
+                'section': '❌ RED (FAIL/CRITICAL)',
+                'description': 'Indicates poor quality requiring attention or re-capture',
+                'items': [
+                    ['Status Values', 'FAIL, POOR, CRITICAL', 'Quality falls below acceptable standards'],
+                    ['Score Range', '0.00 - 0.64 (0% - 64%)', 'Low quality measurements'],
+                    ['Examples', 'Blurry images, poor exposure, significant skew', 'Images need improvement'],
+                    ['Action', 'Re-capture recommended', 'Address underlying capture/processing issues'],
+                    ['Background', 'Light red (#F8D7DA)', 'Alert indicator for problems']
+                ]
+            },
+            {
+                'section': '📊 SCORE INTERPRETATION',
+                'description': 'How numerical scores translate to quality ratings',
+                'items': [
+                    ['0.85 Score', 'PASS Status', 'Excellent quality - meets all requirements'],
+                    ['0.70 Score', 'WARN Status', 'Good quality - minor improvements possible'],
+                    ['0.30 Score', 'FAIL Status', 'Poor quality - significant improvements needed'],
+                    ['0.50 Score', 'UNKNOWN Status', 'Unable to determine - check raw data'],
+                    ['Critical Flag', 'Yes/No Indicator', 'Immediate attention required regardless of score']
+                ]
+            },
+            {
+                'section': '🎯 CATEGORY STATUS MEANINGS',
+                'description': 'What each quality category status indicates',
+                'items': [
+                    ['Sharpness PASS', 'Image is sharp and clear', 'Good focus, minimal blur'],
+                    ['Exposure PASS', 'Proper lighting and brightness', 'No clipping, good dynamic range'],
+                    ['Contrast PASS', 'Good tonal separation', 'Clear distinction between light/dark areas'],
+                    ['Geometry PASS', 'Document properly aligned', 'Minimal skew, correct orientation'],
+                    ['Resolution PASS', 'Sufficient detail capture', 'Adequate DPI for intended use'],
+                    ['Border PASS', 'Proper margins and background', 'Clean borders, dark background'],
+                    ['Completeness PASS', 'Full document captured', 'No content cut off at edges'],
+                    ['Color PASS', 'Natural color reproduction', 'Minimal color cast or distortion'],
+                    ['Format PASS', 'Appropriate file format', 'Correct compression and bit depth'],
+                    ['Noise PASS', 'Clean image quality', 'Minimal digital noise or artifacts']
+                ]
+            },
+            {
+                'section': '📈 USING THE COLOR SYSTEM',
+                'description': 'How to effectively use color coding for analysis',
+                'items': [
+                    ['Quick Scanning', 'Identify problems at a glance', 'Red areas need immediate attention'],
+                    ['Batch Overview', 'Assess overall quality trends', 'Proportion of green/yellow/red'],
+                    ['Priority Setting', 'Focus on red items first', 'Address critical issues before minor ones'],
+                    ['Quality Control', 'Track improvements over time', 'Monitor color distribution changes'],
+                    ['Reporting', 'Communicate status clearly', 'Colors provide instant understanding']
+                ]
+            }
+        ]
+        
+        # Create the guide sheet
+        all_rows = []
+        current_row = 0
+        
+        for section in guide_sections:
+            # Section header
+            all_rows.append({
+                'A': section['section'],
+                'B': section['description'],
+                'C': '',
+                'row_type': 'section_header'
+            })
+            current_row += 1
+            
+            # Add space
+            all_rows.append({'A': '', 'B': '', 'C': '', 'row_type': 'spacer'})
+            current_row += 1
+            
+            # Section items
+            for item in section['items']:
+                all_rows.append({
+                    'A': item[0],
+                    'B': item[1],
+                    'C': item[2] if len(item) > 2 else '',
+                    'row_type': 'content'
+                })
+                current_row += 1
+            
+            # Add space after section
+            all_rows.append({'A': '', 'B': '', 'C': '', 'row_type': 'spacer'})
+            current_row += 1
+        
+        # Create worksheet
+        worksheet = workbook.add_worksheet('Color Coding Guide')
+        
+        # Title
+        worksheet.merge_range('A1:C1', '🎨 COLOR CODING & STATUS INTERPRETATION GUIDE', title_format)
+        
+        # Headers
+        worksheet.write('A2', 'Element', header_format)
+        worksheet.write('B2', 'Meaning', header_format)
+        worksheet.write('C2', 'Description', header_format)
+        
+        # Set column widths
+        worksheet.set_column('A:A', 25)
+        worksheet.set_column('B:B', 35)
+        worksheet.set_column('C:C', 50)
+        
+        # Write content with appropriate formatting
+        row_num = 2
+        for row_data in all_rows:
+            row_num += 1
+            
+            if row_data['row_type'] == 'section_header':
+                # Section headers get title formatting
+                worksheet.merge_range(f'A{row_num}:C{row_num}', row_data['A'], title_format)
+                if row_data['B']:
+                    row_num += 1
+                    worksheet.merge_range(f'A{row_num}:C{row_num}', row_data['B'], header_format)
+                    
+            elif row_data['row_type'] == 'content':
+                # Determine formatting based on content
+                if 'PASS' in row_data['A'] or 'GREEN' in row_data['A'] or 'SUCCESS' in row_data['A']:
+                    format_to_use = success_format
+                elif 'WARN' in row_data['A'] or 'YELLOW' in row_data['A'] or 'CAUTION' in row_data['A']:
+                    format_to_use = warning_format
+                elif 'FAIL' in row_data['A'] or 'RED' in row_data['A'] or 'CRITICAL' in row_data['A']:
+                    format_to_use = fail_format
+                else:
+                    format_to_use = None
+                
+                if format_to_use:
+                    worksheet.write(f'A{row_num}', row_data['A'], format_to_use)
+                    worksheet.write(f'B{row_num}', row_data['B'], format_to_use)
+                    worksheet.write(f'C{row_num}', row_data['C'], format_to_use)
+                else:
+                    worksheet.write(f'A{row_num}', row_data['A'])
+                    worksheet.write(f'B{row_num}', row_data['B'])
+                    worksheet.write(f'C{row_num}', row_data['C'])
+        
+        # Add a legend at the bottom
+        legend_start = row_num + 3
+        worksheet.merge_range(f'A{legend_start}:C{legend_start}', '🎨 COLOR LEGEND', title_format)
+        
+        legend_start += 2
+        worksheet.write(f'A{legend_start}', 'GREEN BACKGROUND', success_format)
+        worksheet.write(f'B{legend_start}', 'PASS/SUCCESS/EXCELLENT', success_format) 
+        worksheet.write(f'C{legend_start}', 'Quality meets standards - no action needed', success_format)
+        
+        legend_start += 1
+        worksheet.write(f'A{legend_start}', 'YELLOW BACKGROUND', warning_format)
+        worksheet.write(f'B{legend_start}', 'WARN/FAIR/MEDIUM', warning_format)
+        worksheet.write(f'C{legend_start}', 'Acceptable quality - consider improvement', warning_format)
+        
+        legend_start += 1
+        worksheet.write(f'A{legend_start}', 'RED BACKGROUND', fail_format)
+        worksheet.write(f'B{legend_start}', 'FAIL/POOR/CRITICAL', fail_format)
+        worksheet.write(f'C{legend_start}', 'Quality issues - attention required', fail_format)
+        
+        print(f"📊 Created Color Coding Guide sheet with comprehensive explanations")
+    
+    def safe_merge_range(self, worksheet, range_str, text, format_obj):
+        """Safely merge range with error handling"""
+        try:
+            worksheet.merge_range(range_str, text, format_obj)
+        except Exception as e:
+            print(f"⚠️ Merge range warning for {range_str}: {e}")
+            # Fall back to writing to first cell if merge fails
+            try:
+                first_cell = range_str.split(':')[0]
+                worksheet.write(first_cell, text, format_obj)
+            except Exception as e2:
+                print(f"❌ Failed to write header: {e2}")
+    
+    def install_batch_excel_packages(self):
+        """Install required packages for batch Excel export"""
+        try:
+            import subprocess
+            import sys
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pandas", "xlsxwriter"])
+            print("✅ Successfully installed batch Excel export packages")
+        except Exception as e:
+            print(f"❌ Failed to install packages: {e}")
         
     def copy_technical_data(self):
         """Copy technical data to clipboard"""
@@ -1513,13 +2674,670 @@ class ProfessionalDesktopImageQualityAnalyzer:
                 print(f"Error updating raw data tab: {e}")
                 self.progress_var.set("Error displaying raw data")
             
+            try:
+                self.update_recommendations_tab(results)
+            except Exception as e:
+                print(f"Error updating recommendations tab: {e}")
+                self.progress_var.set("Error displaying recommendations")
+            
             # Switch to summary tab
             self.results_notebook.select(0)
             
             print("✅ Analysis results displayed successfully!")
             
+            # Automatically export results to Excel with visuals
+            self.auto_export_excel_with_visuals(results)
+            
         except Exception as e:
             self.analysis_error(f"Error displaying results: {e}")
+    
+    def auto_export_excel_with_visuals(self, results):
+        """Automatically export analysis results to Excel with charts and visual formatting"""
+        try:
+            # Try importing pandas first
+            try:
+                import pandas as pd
+            except ImportError:
+                print("⚠️ Installing pandas for Excel export...")
+                import subprocess
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "pandas"])
+                import pandas as pd
+            
+            import xlsxwriter
+            import io
+            import matplotlib.pyplot as plt
+            from matplotlib.patches import Circle
+            import numpy as np
+            
+            # Create output directory
+            base_dir = os.path.dirname(self.current_image_path) if self.current_image_path else os.getcwd()
+            output_dir = os.path.join(base_dir, "analysis_results")
+            os.makedirs(output_dir, exist_ok=True)
+            
+            # Generate professional Excel filename
+            excel_filename, excel_filepath = self.generate_excel_filename(output_dir)
+            
+            # Create Excel writer with xlsxwriter engine for better formatting
+            try:
+                with pd.ExcelWriter(excel_filepath, engine='xlsxwriter') as writer:
+                    
+                    # Get the workbook and add formats
+                    workbook = writer.book
+                
+                    # Define professional formats
+                    header_format = workbook.add_format({
+                        'bold': True,
+                        'font_size': 14,
+                        'bg_color': '#2c5aa0',
+                        'font_color': 'white',
+                        'align': 'center',
+                        'valign': 'vcenter',
+                        'border': 1
+                    })
+                    
+                    title_format = workbook.add_format({
+                        'bold': True,
+                        'font_size': 16,
+                        'bg_color': '#1a252f',
+                        'font_color': 'white',
+                        'align': 'center',
+                        'valign': 'vcenter'
+                    })
+                    
+                    metric_header_format = workbook.add_format({
+                        'bold': True,
+                        'font_size': 12,
+                        'bg_color': '#f8f9fa',
+                        'font_color': '#212529',
+                        'align': 'center',
+                        'border': 1
+                    })
+                    
+                    good_format = workbook.add_format({
+                        'bg_color': '#d4edda',
+                        'font_color': '#155724',
+                        'border': 1,
+                        'align': 'center'
+                    })
+                    
+                    warning_format = workbook.add_format({
+                        'bg_color': '#fff3cd',
+                        'font_color': '#856404',
+                        'border': 1,
+                        'align': 'center'
+                    })
+                    
+                    poor_format = workbook.add_format({
+                        'bg_color': '#f8d7da',
+                        'font_color': '#721c24',
+                        'border': 1,
+                        'align': 'center'
+                    })
+                    
+                    # Create Summary Sheet
+                    print(f"📊 ===== COMPREHENSIVE EXCEL DEBUG =====")
+                    print(f"📊 Creating Excel sheets with results data...")
+                    print(f"📊 Results type: {type(results)}")
+                    print(f"📊 Full results structure:")
+                    if isinstance(results, dict):
+                        for main_key, main_value in results.items():
+                            print(f"📊   MAIN: '{main_key}' = {type(main_value)}")
+                            if isinstance(main_value, dict):
+                                for sub_key, sub_value in main_value.items():
+                                    if isinstance(sub_value, dict):
+                                        print(f"📊     SUB-DICT: '{sub_key}' contains {len(sub_value)} items")
+                                        for detail_key, detail_value in sub_value.items():
+                                            print(f"📊       DETAIL: '{detail_key}' = {detail_value}")
+                                    else:
+                                        print(f"📊     SUB: '{sub_key}' = {sub_value}")
+                            elif isinstance(main_value, list):
+                                print(f"📊     LIST: {len(main_value)} items = {main_value}")
+                            else:
+                                print(f"📊     DIRECT: {main_value}")
+                    print(f"📊 ===== END DEBUG =====")
+                    print(f"📊 Global results keys: {list(results.get('global', {}).keys())}")
+                    print(f"📊 Metrics keys: {list(results.get('metrics', {}).keys())}")
+                    
+                    self.create_summary_sheet(writer, workbook, results, title_format, header_format, metric_header_format)
+                    
+                    # Create Detailed Metrics Sheet
+                    self.create_metrics_sheet(writer, workbook, results, header_format, metric_header_format, good_format, warning_format, poor_format)
+                    
+                    # Create Recommendations Sheet
+                    self.create_recommendations_sheet(writer, workbook, results, header_format, metric_header_format)
+                    
+                    # Create Charts Sheet
+                    self.create_charts_sheet(writer, workbook, results, header_format)
+                
+                print(f"✅ Excel report exported: {excel_filename}")
+                
+                # Update status and show notification
+                self.progress_var.set("✅ Excel report exported successfully!")
+                
+                # Auto-open the Excel file
+                self.open_excel_file(excel_filepath, output_dir)
+                
+            except Exception as e:
+                print(f"❌ Error creating Excel report: {e}")
+                self.progress_var.set("Analysis complete (Excel export error)")
+                messagebox.showwarning(
+                    "Export Warning",
+                    f"Analysis completed successfully, but Excel export failed:\n\n{e}\n\n"
+                    f"You can still view results in the application."
+                )
+        
+        except Exception as e:
+            print(f"❌ Excel export error: {e}")
+            self.progress_var.set("Analysis complete (Excel export error)")
+    
+    def create_summary_sheet(self, writer, workbook, results, title_format, header_format, metric_header_format):
+        """Create the executive summary sheet"""
+        import pandas as pd  # Import here for scope
+        
+        global_results = results.get('global', {})
+        print(f"📊 Global results data: {global_results}")  # Debug print
+        
+        # Extract actual values with proper fallbacks
+        overall_score = global_results.get('overall_score', global_results.get('score', 0))
+        stars = global_results.get('stars', 0)
+        status = global_results.get('status', 'Unknown')
+        
+        # Handle different time formats
+        analysis_time = global_results.get('analysis_time', 
+                                          global_results.get('processing_time', 
+                                                            global_results.get('time', 0)))
+        
+        # Create summary data with actual values
+        summary_data = {
+            'Analysis Summary': [
+                'Overall Score',
+                'Quality Rating (Stars)',
+                'Status',
+                'Image File',
+                'Analysis Date',
+                'Processing Time'
+            ],
+            'Value': [
+                f"{overall_score:.3f}",
+                f"{stars} out of 4 stars",
+                status.upper(),
+                os.path.basename(self.current_image_path) if self.current_image_path else 'N/A',
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                f"{analysis_time:.2f} seconds" if isinstance(analysis_time, (int, float)) else str(analysis_time)
+            ]
+        }
+        
+        print(f"📊 Summary data being written: {summary_data}")  # Debug print
+        
+        # Convert to DataFrame
+        summary_df = pd.DataFrame(summary_data)
+        
+        # Write to Excel
+        summary_df.to_excel(writer, sheet_name='Executive Summary', index=False, startrow=2)
+        
+        # Get the worksheet
+        worksheet = writer.sheets['Executive Summary']
+        
+        # Add title
+        worksheet.merge_range('A1:B1', '🔍 IMAGE QUALITY ANALYSIS REPORT', title_format)
+        
+        # Format columns
+        worksheet.set_column('A:A', 25)
+        worksheet.set_column('B:B', 30)
+        
+        # Format headers
+        worksheet.write('A3', 'Analysis Summary', header_format)
+        worksheet.write('B3', 'Value', header_format)
+        
+        # Add score visualization (text-based gauge)
+        score = global_results.get('score', 0)
+        gauge_text = self.create_text_gauge(score)
+        worksheet.write('A10', 'Quality Gauge:', metric_header_format)
+        worksheet.write('B10', gauge_text)
+        
+    def create_metrics_sheet(self, writer, workbook, results, header_format, metric_header_format, good_format, warning_format, poor_format):
+        """Create detailed metrics sheet with conditional formatting"""
+        import pandas as pd  # Import here for scope
+        
+        metrics_data = results.get('metrics', {})
+        category_status = results.get('category_status', {})
+        print(f"📊 Metrics data: {list(metrics_data.keys())}")  # Debug print
+        print(f"📊 Category status: {category_status}")  # Debug print
+        
+        # Prepare metrics data for DataFrame
+        metrics_rows = []
+        for metric_name, metric_data in metrics_data.items():
+            
+            # Get status from category_status
+            status_text = category_status.get(metric_name, 'unknown')
+            
+            # Convert status to score (reverse-engineer scores from category status)
+            if status_text == 'pass':
+                score = 0.85  # Assume good passing score
+                status = 'EXCELLENT'
+            elif status_text == 'warn':
+                score = 0.70  # Assume warning score
+                status = 'FAIR'
+            elif status_text == 'fail':
+                score = 0.30  # Assume failing score
+                status = 'POOR'
+            else:
+                score = 0.50  # Default/unknown
+                status = 'UNKNOWN'
+            
+            # Try to extract meaningful details from the complex metric data
+            details = self.extract_metric_details(metric_name, metric_data)
+            threshold = 'Varies by metric'
+            
+            # Create readable metric name
+            readable_name = metric_name.replace('_', ' ').title()
+            
+            metrics_rows.append({
+                'Metric': readable_name,
+                'Score': f"{score:.3f}",
+                'Percentage': f"{score:.1%}",
+                'Status': status,
+                'Threshold': threshold,
+                'Details': details
+            })
+            
+            print(f"📊 Added metric: {readable_name} = {score:.3f} ({status}) from category '{status_text}'")  # Debug print
+        
+        if not metrics_rows:
+            # Add a placeholder if no metrics found
+            metrics_rows.append({
+                'Metric': 'No Metrics Available',
+                'Score': '0.000',
+                'Percentage': '0.0%',
+                'Status': 'N/A',
+                'Threshold': 'N/A',
+                'Details': 'No detailed metrics were found in the analysis results'
+            })
+        
+        print(f"📊 Total metrics rows: {len(metrics_rows)}")  # Debug print
+        
+        # Convert to DataFrame
+        metrics_df = pd.DataFrame(metrics_rows)
+        
+        # Write to Excel
+        metrics_df.to_excel(writer, sheet_name='Detailed Metrics', index=False, startrow=2)
+        
+        # Get the worksheet
+        worksheet = writer.sheets['Detailed Metrics']
+        
+        # Add title
+        worksheet.merge_range('A1:F1', '📊 DETAILED QUALITY METRICS', header_format)
+        
+        # Add proper headers with formatting
+        for col_num, column_title in enumerate(metrics_df.columns):
+            worksheet.write(1, col_num, column_title, metric_header_format)
+        
+        # Format columns
+        worksheet.set_column('A:A', 20)  # Metric
+        worksheet.set_column('B:B', 12)  # Score
+        worksheet.set_column('C:C', 15)  # Percentage
+        worksheet.set_column('D:D', 15)  # Status
+        worksheet.set_column('E:E', 15)  # Threshold
+        worksheet.set_column('F:F', 40)  # Details
+        
+        # Apply conditional formatting based on status
+        for row_num, row_data in enumerate(metrics_rows, start=4):  # Start from row 4 now
+            status = row_data['Status']
+            if status == 'EXCELLENT':
+                format_to_use = good_format
+            elif status == 'GOOD':
+                format_to_use = good_format
+            elif status == 'FAIR':
+                format_to_use = warning_format
+            else:
+                format_to_use = poor_format
+            
+            worksheet.write(f'D{row_num}', status, format_to_use)
+            
+    def create_recommendations_sheet(self, writer, workbook, results, header_format, metric_header_format):
+        """Create recommendations sheet"""
+        import pandas as pd  # Import here for scope
+        
+        global_results = results.get('global', {})
+        actions = global_results.get('actions', global_results.get('recommendations', []))
+        
+        print(f"📊 Found {len(actions)} recommendations")  # Debug print
+        
+        # Categorize recommendations
+        critical_actions = []
+        warning_actions = []
+        general_actions = []
+        
+        for action in actions:
+            clean_action = str(action).replace('❌', '').replace('⚠️', '').strip()
+            if '❌' in str(action) or 'critical' in clean_action.lower() or 'urgent' in clean_action.lower():
+                critical_actions.append(clean_action)
+            elif '⚠️' in str(action) or 'warning' in clean_action.lower() or 'improve' in clean_action.lower():
+                warning_actions.append(clean_action)
+            else:
+                general_actions.append(clean_action)
+        
+        # Create recommendations data
+        all_recommendations = []
+        
+        for action in critical_actions:
+            all_recommendations.append({
+                'Priority': 'CRITICAL',
+                'Category': 'Immediate Action Required',
+                'Recommendation': action
+            })
+            
+        for action in warning_actions:
+            all_recommendations.append({
+                'Priority': 'WARNING',
+                'Category': 'Improvement Suggested',
+                'Recommendation': action
+            })
+            
+        for action in general_actions:
+            all_recommendations.append({
+                'Priority': 'INFO',
+                'Category': 'General Guidance',
+                'Recommendation': action
+            })
+        
+        # If no recommendations found, add default message
+        if not all_recommendations:
+            all_recommendations.append({
+                'Priority': 'INFO',
+                'Category': 'Status',
+                'Recommendation': 'No specific recommendations found. Image quality appears to meet standards.'
+            })
+        
+        print(f"📊 Created {len(all_recommendations)} recommendation rows")  # Debug print
+        
+        if all_recommendations:
+            rec_df = pd.DataFrame(all_recommendations)
+            rec_df.to_excel(writer, sheet_name='Recommendations', index=False, startrow=2)
+            
+            # Get the worksheet
+            worksheet = writer.sheets['Recommendations']
+            
+            # Add title safely
+            self.safe_merge_range(worksheet, 'A1:C1', '💡 QUALITY IMPROVEMENT RECOMMENDATIONS', header_format)
+            
+            # Add proper headers with formatting
+            for col_num, column_title in enumerate(rec_df.columns):
+                worksheet.write(1, col_num, column_title, metric_header_format)
+            
+            # Format columns
+            worksheet.set_column('A:A', 15)  # Priority
+            worksheet.set_column('B:B', 25)  # Category
+            worksheet.set_column('C:C', 60)  # Recommendation
+        
+    def create_charts_sheet(self, writer, workbook, results, header_format):
+        """Create charts and visual representations"""
+        worksheet = workbook.add_worksheet('Visual Charts')
+        
+        # Add title
+        worksheet.merge_range('A1:H1', '📈 VISUAL ANALYSIS CHARTS', header_format)
+        
+        # Create a simple metrics chart using Excel's chart feature
+        metrics_data = results.get('metrics', {})
+        
+        print(f"📊 Creating charts with {len(metrics_data)} metrics")  # Debug print
+        
+        if metrics_data:
+            # Prepare data for chart
+            row = 3
+            worksheet.write('A2', 'Metric', header_format)
+            worksheet.write('B2', 'Score', header_format)
+            
+            chart_data = []
+            category_status = results.get('category_status', {})
+            
+            for metric_name, metric_data in metrics_data.items():
+                readable_name = metric_name.replace('_', ' ').title()
+                
+                # Use same scoring logic as metrics sheet
+                status_text = category_status.get(metric_name, 'unknown')
+                
+                if status_text == 'pass':
+                    score = 0.85
+                elif status_text == 'warn':
+                    score = 0.70
+                elif status_text == 'fail':
+                    score = 0.30
+                else:
+                    score = 0.50
+                
+                worksheet.write(row, 0, readable_name)
+                worksheet.write(row, 1, score)
+                chart_data.append((readable_name, score))
+                row += 1
+                print(f"📊 Chart data: {readable_name} = {score}")  # Debug print
+            
+            # Create a column chart
+            chart = workbook.add_chart({'type': 'column'})
+            chart.add_series({
+                'name': 'Quality Scores',
+                'categories': f'=\'Visual Charts\'!$A$3:$A${row-1}',
+                'values': f'=\'Visual Charts\'!$B$3:$B${row-1}',
+                'fill': {'color': '#2c5aa0'},
+            })
+            
+            chart.set_title({'name': 'Quality Metrics Overview'})
+            chart.set_x_axis({'name': 'Quality Metrics'})
+            chart.set_y_axis({'name': 'Score (0-1)', 'max': 1})
+            chart.set_size({'width': 600, 'height': 400})
+            
+            worksheet.insert_chart('D3', chart)
+            
+            print(f"📊 Chart created with {len(chart_data)} data points")  # Debug print
+        else:
+            # No metrics data available
+            worksheet.write('A3', 'No metrics data available for chart creation')
+            print("📊 No metrics data available for charts")  # Debug print
+    
+    def get_status_from_score(self, score):
+        """Convert numeric score to status text"""
+        if score >= 0.8:
+            return 'EXCELLENT'
+        elif score >= 0.6:
+            return 'GOOD'
+        elif score >= 0.4:
+            return 'FAIR'
+        else:
+            return 'POOR'
+    
+    def extract_metric_details(self, metric_name, metric_data):
+        """Extract meaningful details from complex metric data structure"""
+        if not isinstance(metric_data, dict):
+            return str(metric_data)
+        
+        # Define key metrics to extract for each category
+        detail_mappings = {
+            'completeness': ['content_bbox_coverage', 'edge_touch_flag'],
+            'foreign_objects': ['foreign_object_flag', 'foreign_object_area_pct'],
+            'sharpness': ['laplacian_var', 'gradient_magnitude_mean'],
+            'exposure': ['shadow_clip_pct', 'highlight_clip_pct'],
+            'contrast': ['global_contrast', 'rms_contrast'],
+            'color': ['hue_cast_degrees', 'gray_deltaE'],
+            'geometry': ['skew_angle_deg', 'warp_index'],
+            'border_background': ['bg_median_lum', 'left_margin_ratio'],
+            'noise': ['bg_noise_std', 'blockiness_index'],
+            'format_integrity': ['format_name', 'bit_depth'],
+            'resolution': ['effective_dpi_x', 'effective_dpi_y']
+        }
+        
+        key_metrics = detail_mappings.get(metric_name, [])
+        details = []
+        
+        for key in key_metrics:
+            if key in metric_data:
+                value = metric_data[key]
+                if isinstance(value, float):
+                    details.append(f"{key}: {value:.3f}")
+                else:
+                    details.append(f"{key}: {value}")
+        
+        # If no specific keys found, try to extract first few meaningful values
+        if not details:
+            count = 0
+            for key, value in metric_data.items():
+                if count >= 2:  # Limit to 2 details
+                    break
+                if not key.startswith('_') and not isinstance(value, dict):
+                    if isinstance(value, float):
+                        details.append(f"{key}: {value:.3f}")
+                    else:
+                        details.append(f"{key}: {value}")
+                    count += 1
+        
+        return "; ".join(details) if details else "Complex metric data"
+    
+    def clean_filename(self, filename):
+        """Clean filename for safe file system use"""
+        import re
+        # Remove or replace problematic characters
+        filename = re.sub(r'[<>:"/\\|?*]', '_', filename)  # Replace invalid chars
+        filename = re.sub(r'[^\w\s\-_.]', '', filename)    # Keep only alphanumeric, spaces, hyphens, underscores, dots
+        filename = re.sub(r'\s+', '_', filename)           # Replace spaces with underscores
+        filename = re.sub(r'_+', '_', filename)            # Replace multiple underscores with single
+        filename = filename.strip('_')                     # Remove leading/trailing underscores
+        return filename
+    
+    def generate_excel_filename(self, output_dir):
+        """Generate professional Excel filename with multiple naming strategies"""
+        from datetime import datetime
+        
+        # Create timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        short_timestamp = datetime.now().strftime("%m%d_%H%M")
+        
+        if not self.current_image_path:
+            filename = f"ImageQuality_Analysis_{timestamp}.xlsx"
+            return filename, os.path.join(output_dir, filename)
+        
+        # Get image and folder information
+        image_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
+        folder_name = os.path.basename(os.path.dirname(self.current_image_path))
+        
+        # Clean names for file system safety
+        image_name = self.clean_filename(image_name)
+        folder_name = self.clean_filename(folder_name)
+        
+        # Determine naming strategy
+        generic_names = ['image', 'img', 'photo', 'picture', 'document', 'doc', 'scan', 
+                        'untitled', 'new', 'temp', 'screenshot', 'capture']
+        system_folders = ['desktop', 'downloads', 'documents', 'pictures', 'photos', 
+                         'onedrive', 'dropbox', 'google drive', 'icloud']
+        
+        is_generic_image = any(generic in image_name.lower() for generic in generic_names)
+        is_system_folder = folder_name.lower() in system_folders
+        
+        # Strategy 1: Use meaningful folder name if image name is generic
+        if is_generic_image and not is_system_folder and folder_name:
+            base_name = f"{folder_name}_Analysis"
+        
+        # Strategy 2: Use image name if it's descriptive (not too long/short)
+        elif not is_generic_image and 5 <= len(image_name) <= 40:
+            base_name = image_name
+        
+        # Strategy 3: Combine folder + short image name for very long names
+        elif len(image_name) > 40 and not is_system_folder and folder_name:
+            short_image = image_name[:20]
+            base_name = f"{folder_name}_{short_image}"
+        
+        # Strategy 4: Use truncated image name
+        elif len(image_name) > 40:
+            base_name = image_name[:40]
+        
+        # Strategy 5: Default fallback
+        else:
+            if not is_system_folder and folder_name:
+                base_name = f"{folder_name}_Analysis"
+            else:
+                base_name = "Quality_Analysis"
+        
+        # Create final filename with timestamp
+        # For very long base names, use short timestamp
+        if len(base_name) > 30:
+            filename = f"{base_name}_{short_timestamp}.xlsx"
+        else:
+            filename = f"{base_name}_{timestamp}.xlsx"
+        
+        # Ensure filename isn't too long (Windows has 260 char limit)
+        max_filename_length = 100  # Conservative limit
+        if len(filename) > max_filename_length:
+            base_truncated = base_name[:max_filename_length-20]  # Leave room for timestamp + extension
+            filename = f"{base_truncated}_{short_timestamp}.xlsx"
+        
+        filepath = os.path.join(output_dir, filename)
+        
+        # Log the filename choice for user reference
+        print(f"📊 Excel report: {filename}")
+        print(f"📂 Source: {os.path.basename(self.current_image_path)} from {folder_name}/")
+        
+        return filename, filepath
+    
+    def create_text_gauge(self, score):
+        """Create a text-based gauge visualization"""
+        filled_blocks = int(score * 10)
+        empty_blocks = 10 - filled_blocks
+        gauge = '█' * filled_blocks + '░' * empty_blocks
+        return f"{gauge} {score:.1%}"
+    
+    def install_and_retry_excel_export(self, results):
+        """Install pandas and retry Excel export"""
+        try:
+            import subprocess
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pandas"])
+            print("✅ Pandas installed, retrying Excel export...")
+            self.auto_export_excel_with_visuals(results)
+        except Exception as e:
+            print(f"❌ Failed to install pandas: {e}")
+            self.progress_var.set("Analysis complete (Excel export unavailable)")
+    
+    def open_excel_file(self, excel_filepath, output_dir):
+        """Open the Excel file automatically"""
+        try:
+            import subprocess
+            import platform
+            
+            # Show success notification
+            messagebox.showinfo(
+                "Excel Report Ready!",
+                f"✅ Professional Excel report created!\n\n"
+                f"📊 File: {os.path.basename(excel_filepath)}\n"
+                f"📂 Location: {output_dir}\n\n"
+                f"The report includes:\n"
+                f"• Executive summary with scores\n"
+                f"• Detailed metrics with color coding\n"
+                f"• Actionable recommendations\n"
+                f"• Visual charts and graphs\n\n"
+                f"Opening Excel file now..."
+            )
+            
+            # Open the Excel file
+            if platform.system() == 'Windows':
+                os.startfile(excel_filepath)
+                # Also open the folder
+                subprocess.run(['explorer', output_dir])
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.run(['open', excel_filepath])
+                subprocess.run(['open', output_dir])
+            else:  # Linux
+                subprocess.run(['xdg-open', excel_filepath])
+                subprocess.run(['xdg-open', output_dir])
+            
+            print(f"📊 Opened Excel report: {excel_filepath}")
+            print(f"📂 Opened results folder: {output_dir}")
+            
+        except Exception as e:
+            print(f"Error opening Excel file: {e}")
+            messagebox.showinfo(
+                "Report Created",
+                f"✅ Excel report created successfully!\n\n"
+                f"📂 Location: {output_dir}\n"
+                f"📄 File: {os.path.basename(excel_filepath)}\n\n"
+                f"Please open the file manually to view the report."
+            )
     
     def update_summary_tab(self, results):
         """Update the executive summary tab with results"""
@@ -1740,6 +3558,86 @@ CATEGORY BREAKDOWN:
         except Exception as e:
             self.raw_text.insert(1.0, f"Error formatting results: {e}\n\n{results}")
     
+    def update_recommendations_tab(self, results):
+        """Update the recommendations tab with structured recommendations"""
+        try:
+            global_results = results['global']
+            actions = global_results.get('actions', [])
+            
+            # Clear existing content
+            self.priority_text.delete(1.0, tk.END)
+            self.improvements_text.delete(1.0, tk.END)
+            self.best_practices_text.delete(1.0, tk.END)
+            
+            # Categorize recommendations
+            priority_actions = []
+            improvement_suggestions = []
+            
+            for action in actions:
+                clean_action = action.replace('\u274c', '❌').replace('\u26a0\ufe0f', '⚠️')
+                if '❌' in clean_action:
+                    priority_actions.append(clean_action)
+                else:
+                    improvement_suggestions.append(clean_action)
+            
+            # Priority Actions
+            if priority_actions:
+                priority_text = "CRITICAL ISSUES - IMMEDIATE ACTION REQUIRED:\n\n"
+                for i, action in enumerate(priority_actions, 1):
+                    priority_text += f"{i}. {action}\n\n"
+            else:
+                priority_text = "✅ No critical issues found!\n\nYour image quality meets the required standards."
+            
+            self.priority_text.insert(1.0, priority_text)
+            
+            # Improvement Suggestions
+            if improvement_suggestions:
+                improvements_text = "SUGGESTED IMPROVEMENTS:\n\n"
+                for i, action in enumerate(improvement_suggestions, 1):
+                    improvements_text += f"{i}. {action}\n\n"
+            else:
+                improvements_text = "✅ No specific improvements needed.\n\nYour image quality is excellent!"
+            
+            self.improvements_text.insert(1.0, improvements_text)
+            
+            # Best Practices
+            best_practices_text = """DOCUMENT IMAGING BEST PRACTICES:
+
+📸 CAPTURING:
+• Use good lighting - avoid shadows and glare
+• Keep the camera steady - use a tripod if possible
+• Ensure the document is flat and fully visible
+• Maintain consistent distance from the document
+
+🖼️ QUALITY SETTINGS:
+• Use at least 300 DPI for text documents
+• Save in uncompressed format (TIFF/PNG) when possible
+• Avoid heavy JPEG compression
+• Capture in color even for black and white documents
+
+📐 POSITIONING:
+• Align document edges with image borders
+• Include small margins around the document
+• Avoid skewed or rotated captures
+• Ensure all text is clearly legible
+
+💡 POST-PROCESSING:
+• Adjust exposure if too dark or too bright
+• Correct any rotation or skew
+• Crop to remove unnecessary background
+• Enhance contrast if text is faint"""
+            
+            self.best_practices_text.insert(1.0, best_practices_text)
+            
+        except Exception as e:
+            print(f"Error in update_recommendations_tab: {e}")
+            # Fallback error display
+            try:
+                self.priority_text.delete(1.0, tk.END)
+                self.priority_text.insert(1.0, f"Error loading recommendations: {e}")
+            except:
+                pass
+    
     def export_report(self):
         """Export analysis results to file"""
         if not self.current_results:
@@ -1800,7 +3698,7 @@ def main():
     style.theme_use('clam')  # Use a modern theme
     
     # Configure accent button style
-    style.configure('Accent.TButton', foreground='white', background='#0078d4')
+    style.configure('Accent.TButton', foreground='#2c3e50', background='#0078d4')
     style.map('Accent.TButton', background=[('active', '#106ebe')])
     
     app = ProfessionalDesktopImageQualityAnalyzer(root)

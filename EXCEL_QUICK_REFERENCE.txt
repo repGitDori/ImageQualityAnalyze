@@ -1,0 +1,86 @@
+📊 QUICK REFERENCE: EXCEL REPORT ANALYSIS
+==========================================
+
+🔍 WHAT TO CHECK FIRST:
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣ EXECUTIVE SUMMARY SHEET:
+   • Overall Score: Want 0.6+ for most uses, 0.8+ for professional
+   • Status: "FAIL" = major issues, "EXCELLENT" = ready to use
+   • Stars: 1-2 stars = needs work, 3-4 stars = good quality
+
+2️⃣ DETAILED METRICS SHEET:
+   • Look for RED cells = problem areas
+   • Focus on scores below 0.5 = significant issues
+   • Scores 0.7+ = generally acceptable
+
+3️⃣ RECOMMENDATIONS SHEET:
+   • 🚨 CRITICAL = must fix
+   • ⚠️ WARNING = should fix
+   • ℹ️ INFO = optional
+
+4️⃣ VISUAL CHARTS SHEET:
+   • Short bars = problem areas
+   • Consistently high bars = good quality
+
+⚡ QUICK DECISION MATRIX:
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+USE AS-IS:
+✅ Overall Score 0.7+
+✅ No CRITICAL recommendations
+✅ Status shows "EXCELLENT" or "GOOD"
+
+MINOR IMPROVEMENTS:
+⚠️ Overall Score 0.5-0.7
+⚠️ A few WARNING recommendations
+⚠️ Status shows "FAIR"
+
+NEEDS RETAKE:
+❌ Overall Score below 0.5
+❌ Multiple CRITICAL recommendations  
+❌ Status shows "FAIL"
+
+📋 MOST IMPORTANT METRICS BY USE CASE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 Document Scanning:
+   Priority: Completeness (0.8+), Sharpness (0.7+), Contrast (0.7+)
+
+🗂️ Archival Storage:
+   Priority: Resolution (0.8+), Format Integrity (0.9+), Overall (0.8+)
+
+👔 Professional Use:
+   Priority: All metrics 0.7+, Overall 0.9+, No CRITICAL issues
+
+📱 Quick Sharing:
+   Priority: Sharpness (0.6+), Exposure (0.5+), Overall (0.5+)
+
+🚨 IMMEDIATE ACTION NEEDED IF:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Completeness below 0.5 (document cut off)
+• Sharpness below 0.4 (too blurry to read)
+• Multiple metrics showing "FAIL"
+• Overall score below 0.3
+• Status shows "FAIL" with critical_fail = True
+
+💡 COMMON FIXES:
+━━━━━━━━━━━━━━━
+
+🔍 Blurry/Low Sharpness:
+→ Clean lens, steady camera, better focus
+
+💡 Too Dark/Bright:
+→ Adjust lighting, avoid shadows/glare
+
+📐 Crooked/Distorted:
+→ Align camera straight, flatten document
+
+📄 Incomplete Capture:
+→ Move camera back, include full document
+
+🎨 Color Issues:
+→ Check white balance, use neutral lighting
+
+Remember: Not every photo needs to be perfect - just good enough for your specific needs!
