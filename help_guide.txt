@@ -1,0 +1,90 @@
+# 🏢 Professional Image Quality Analyzer - Help Guide
+
+## 🚀 Quick Start
+
+1. **📁 Select Image** - Click "Browse Files" to choose your document image
+2. **⚙️ Choose Standards** - Select quality standards from the dropdown
+3. **🔧 Configure Options** - Enable visualizations and detailed reports if needed
+4. **🚀 Analyze** - Click "Analyze Quality" to start the analysis
+5. **📋 Export** - Save your results as JSON or view detailed reports
+
+## 📊 Quality Standards
+
+- **Default** - Standard document quality requirements
+- **Strict** - High-quality requirements for professional documents  
+- **Lenient** - Relaxed requirements for older or degraded documents
+- **Custom** - Create your own quality thresholds
+
+## 🔍 Analysis Results
+
+### Executive Summary Tab
+- **Overall Score** - Quality rating from 0-100
+- **Pass/Warn/Fail Counts** - Quick status overview
+- **Quality Assessment** - Detailed written analysis
+
+### Quality Metrics Tab
+- **Individual Scores** - Detailed breakdown of each quality metric
+- **Pass/Fail Status** - Clear indication of what needs attention
+- **Technical Details** - Specific measurements and thresholds
+
+### Technical Data Tab
+- **Raw JSON** - Complete technical analysis data
+- **Copy/Save Options** - Export technical data for further analysis
+
+## ⚙️ Advanced Features
+
+### Custom Standards
+Click "Custom Standards" to create your own quality thresholds for:
+- **Resolution** - Minimum DPI requirements
+- **Sharpness** - Focus and blur detection sensitivity
+- **Exposure** - Lighting and brightness standards
+- **Geometry** - Skew and orientation tolerances
+- **Completeness** - Border and content requirements
+
+### Batch Analysis
+Process multiple images at once:
+1. Click "Batch Analysis"
+2. Select a folder containing images
+3. Choose output format (JSON/Excel)
+4. Review results in generated reports
+
+## 🛡️ Security & Privacy
+
+- ✅ **100% Offline** - No internet connection required
+- ✅ **Local Processing** - Images never leave your computer
+- ✅ **No External Services** - Complete privacy protection
+- ✅ **Secure Analysis** - Professional-grade security standards
+
+## 📋 Supported Formats
+
+**Input:** JPG, PNG, TIFF, BMP, GIF
+**Output:** JSON reports, Excel files, PNG visualizations
+
+## 🔧 Troubleshooting
+
+**Analysis Fails:** 
+- Ensure image is a valid format
+- Check file isn't corrupted
+- Try a smaller image size
+
+**Slow Performance:**
+- Disable visualizations for faster analysis
+- Close other applications to free memory
+- Use standard quality settings instead of strict
+
+**Export Issues:**
+- Ensure you have write permissions to the output folder
+- Check available disk space
+- Try exporting to a different location
+
+## 📞 Tips for Best Results
+
+- Use images with at least 150 DPI resolution
+- Ensure good lighting and contrast
+- Avoid shadows or glare on documents
+- Keep documents flat and properly oriented
+- Use high-quality scanning/photography settings
+
+---
+
+**Version:** 2.0 Professional | **Mode:** Secure Offline Analysis
