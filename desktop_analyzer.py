@@ -665,6 +665,14 @@ class ProfessionalDesktopImageQualityAnalyzer:
             foreground='#7f8c8d'
         )
         
+        # Help button
+        self.help_button = ttk.Button(
+            self.status_frame,
+            text="❓",
+            command=self.show_help,
+            width=3
+        )
+        
         # === CONTROL PANEL ===
         self.control_panel = ttk.LabelFrame(self.main_frame, text="🎛️ Analysis Control Panel", padding="20")
         
@@ -2277,6 +2285,7 @@ class ProfessionalDesktopImageQualityAnalyzer:
         self.status_frame.grid(row=0, column=1, sticky="e")
         self.security_label.pack(anchor="e")
         self.version_label.pack(anchor="e")
+        self.help_button.pack(anchor="e", pady=(5, 0))
         
         # Control panel
         self.control_panel.grid(row=1, column=0, sticky="ew", pady=(0, 20))
