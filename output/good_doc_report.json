@@ -1,0 +1,209 @@
+{
+  "image_id": "good_doc",
+  "file_path": "sample_images/good_doc.jpg",
+  "pixels": {
+    "w": 800,
+    "h": 600
+  },
+  "dpi": {
+    "x": 72,
+    "y": 72
+  },
+  "metrics": {
+    "completeness": {
+      "content_bbox_coverage": 0.9970854166666666,
+      "edge_touch_flag": true,
+      "margins": {
+        "left_px": 0,
+        "right_px": 1,
+        "top_px": 0,
+        "bottom_px": 1
+      },
+      "edge_violations": {
+        "left_violation": true,
+        "right_violation": true,
+        "top_violation": true,
+        "bottom_violation": true
+      },
+      "document_bbox": {
+        "x_min": 0,
+        "y_min": 0,
+        "x_max": 799,
+        "y_max": 599,
+        "width": 799,
+        "height": 599,
+        "aspect_ratio": 1.333889816360601
+      }
+    },
+    "foreign_objects": {
+      "foreign_object_flag": false,
+      "foreign_object_area_pct": 0.0
+    },
+    "sharpness": {
+      "laplacian_var": 1199.9157833333334,
+      "gradient_magnitude_mean": 15.782415217884925,
+      "edge_density": 0.01354375,
+      "local_sharpness": {
+        "mean": 1334.8343765857892,
+        "std": 2974.418418006739,
+        "min": 0.0,
+        "max": 14266.04598134756,
+        "percentiles": {
+          "p10": 0.0,
+          "p25": 0.0,
+          "p50": 0.0,
+          "p75": 1743.46875,
+          "p90": 2688.1666666666665
+        }
+      },
+      "frequency_metrics": {
+        "high_freq_energy": 0.000998036004602909,
+        "mid_freq_energy": 0.0015001381980255246,
+        "low_freq_energy": 0.99750155210495,
+        "spectral_centroid": 0.001965734234465323
+      },
+      "sharpness_map_shape": [
+        10,
+        13
+      ]
+    },
+    "exposure": {
+      "clipping": {
+        "shadow_clip_pct": 0.0008333333333333334,
+        "highlight_clip_pct": 97.63208333333333,
+        "shadow_clipped_pixels": 4,
+        "highlight_clipped_pixels": 468634,
+        "total_pixels": 480000
+      },
+      "illumination_uniformity": {
+        "uniformity_ratio": 0.016219882294535637,
+        "local_std": 0.01604185253381729,
+        "local_mean": 0.9890239834785461,
+        "coefficient_of_variation": 1.6219881772994995,
+        "num_tiles_analyzed": 130
+      },
+      "brightness": {
+        "mean": 0.9920396208763123,
+        "median": 1.0,
+        "std": 0.06737544387578964,
+        "min": 0.0,
+        "max": 1.0,
+        "percentiles": {
+          "p5": 1.0,
+          "p10": 1.0,
+          "p25": 1.0,
+          "p75": 1.0,
+          "p90": 1.0,
+          "p95": 1.0
+        }
+      },
+      "dynamic_range": {
+        "effective_range": 0.0,
+        "full_range": 1.0,
+        "utilization": 0.0,
+        "p5_value": 1.0,
+        "p95_value": 1.0
+      },
+      "background": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0
+      }
+    },
+    "contrast": {
+      "global_contrast": 0.0,
+      "rms_contrast": 0.06737544387578964,
+      "percentiles": {
+        "p5": 1.0,
+        "p95": 1.0
+      },
+      "mean_luminance": 0.9920396208763123,
+      "local_contrast": {
+        "mean": 0.04443066567182541,
+        "std": 0.06071827933192253,
+        "min": 0.0,
+        "max": 0.1797780692577362,
+        "num_tiles": 130
+      }
+    },
+    "color": {
+      "enabled": true,
+      "hue_cast_degrees": 0.0,
+      "gray_deltaE": null
+    },
+    "geometry": {
+      "skew_angle_deg": 0.0,
+      "skew_angle_abs": 0.0,
+      "line_angles": {
+        "detected_lines": 21,
+        "angle_std": 0.6796935595261344,
+        "angle_range": 3.3776584833976497
+      },
+      "warp_index": 0.02470677078118837,
+      "orientation": {
+        "aspect_ratio": 1.333889816360601,
+        "orientation": "landscape",
+        "doc_width_px": 799,
+        "doc_height_px": 599
+      }
+    },
+    "border_background": {
+      "bg_median_lum": 0.0,
+      "bg_mean_lum": 0.0,
+      "bg_std": 0.0,
+      "left_margin_ratio": 0.0,
+      "right_margin_ratio": 0.0012515644555694619,
+      "top_margin_ratio": 0.0,
+      "bottom_margin_ratio": 0.001669449081803005,
+      "margins_px": {
+        "left": 0,
+        "right": 1,
+        "top": 0,
+        "bottom": 1
+      }
+    },
+    "noise": {
+      "bg_noise_std": 0.033692557364702225,
+      "blockiness_index": 0.04017183071562978
+    },
+    "format_integrity": {
+      "format_name": "jpeg",
+      "format_allowed": true,
+      "bit_depth": 8,
+      "jpeg_quality": null,
+      "compression": null
+    },
+    "resolution": {
+      "effective_dpi_x": 72.0,
+      "effective_dpi_y": 72.0,
+      "pixel_width": 800,
+      "pixel_height": 600,
+      "megapixels": 0.48
+    }
+  },
+  "category_status": {
+    "completeness": "fail",
+    "sharpness": "pass",
+    "exposure": "fail",
+    "contrast": "fail",
+    "color": "pass",
+    "geometry": "pass",
+    "border_background": "pass",
+    "noise": "pass",
+    "format_integrity": "pass",
+    "resolution": "fail"
+  },
+  "global": {
+    "score": 0.6,
+    "stars": 1,
+    "status": "fail",
+    "critical_fail": true,
+    "actions": [
+      "\u274c Ensure full document is captured with margins",
+      "\u274c Adjust lighting or camera exposure settings",
+      "\u274c Improve lighting conditions or post-process contrast",
+      "\u274c Scan/photograph at higher DPI/resolution"
+    ]
+  }
+}
