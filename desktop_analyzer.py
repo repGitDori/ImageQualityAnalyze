@@ -1494,6 +1494,62 @@ class ProfessionalDesktopImageQualityAnalyzer:
                     'align': 'center'
                 })
                 
+                # Universal status color coding function
+                def apply_status_color_coding(worksheet, df, start_row=2):
+                    """Apply color coding to all status columns in a worksheet"""
+                    status_columns = []
+                    
+                    # Find all columns that contain 'Status' in their name
+                    for col_num, col_name in enumerate(df.columns):
+                        if 'Status' in str(col_name) or col_name == 'Status':
+                            status_columns.append((col_num, col_name))
+                    
+                    # Apply conditional formatting to each status column
+                    for col_num, col_name in status_columns:
+                        col_letter = chr(65 + col_num)  # Convert to Excel column letter
+                        
+                        # Define the range for conditional formatting (data rows only)
+                        last_row = start_row + len(df) - 1
+                        range_str = f"{col_letter}{start_row}:{col_letter}{last_row}"
+                        
+                        # PASS/EXCELLENT = Green
+                        worksheet.conditional_format(range_str, {
+                            'type': 'text',
+                            'criteria': 'containing',
+                            'value': 'PASS',
+                            'format': success_format
+                        })
+                        worksheet.conditional_format(range_str, {
+                            'type': 'text', 
+                            'criteria': 'containing',
+                            'value': 'EXCELLENT',
+                            'format': success_format
+                        })
+                        
+                        # WARN/WARNING = Yellow
+                        worksheet.conditional_format(range_str, {
+                            'type': 'text',
+                            'criteria': 'containing', 
+                            'value': 'WARN',
+                            'format': warning_format
+                        })
+                        
+                        # FAIL/POOR = Red
+                        worksheet.conditional_format(range_str, {
+                            'type': 'text',
+                            'criteria': 'containing',
+                            'value': 'FAIL',
+                            'format': fail_format
+                        })
+                        worksheet.conditional_format(range_str, {
+                            'type': 'text',
+                            'criteria': 'containing',
+                            'value': 'POOR',
+                            'format': fail_format
+                        })
+                        
+                        print(f"   🎨 Applied color coding to '{col_name}' column")
+                
                 # 1. BATCH SUMMARY SHEET
                 self.create_batch_summary_sheet(writer, workbook, successful_results, failed_results, 
                                               title_format, header_format, success_format, fail_format)
@@ -1930,6 +1986,40 @@ class ProfessionalDesktopImageQualityAnalyzer:
         # Set column widths
         for i, col in enumerate(detailed_df.columns):
             worksheet.set_column(i, i, 15)
+            
+        # Apply status color coding to all Status columns
+        status_columns = []
+        for col_num, col_name in enumerate(detailed_df.columns):
+            if 'Status' in str(col_name) or col_name == 'Status':
+                status_columns.append((col_num, col_name))
+        
+        for col_num, col_name in status_columns:
+            col_letter = chr(65 + col_num)
+            last_row = 3 + len(detailed_df) - 1
+            range_str = f"{col_letter}3:{col_letter}{last_row}"
+            
+            # PASS/EXCELLENT = Green
+            worksheet.conditional_format(range_str, {
+                'type': 'text', 'criteria': 'containing', 'value': 'PASS', 'format': success_format
+            })
+            worksheet.conditional_format(range_str, {
+                'type': 'text', 'criteria': 'containing', 'value': 'EXCELLENT', 'format': success_format
+            })
+            
+            # WARN/WARNING = Yellow
+            worksheet.conditional_format(range_str, {
+                'type': 'text', 'criteria': 'containing', 'value': 'WARN', 'format': warning_format
+            })
+            
+            # FAIL/POOR = Red
+            worksheet.conditional_format(range_str, {
+                'type': 'text', 'criteria': 'containing', 'value': 'FAIL', 'format': fail_format
+            })
+            worksheet.conditional_format(range_str, {
+                'type': 'text', 'criteria': 'containing', 'value': 'POOR', 'format': fail_format
+            })
+            
+            print(f"   🎨 Applied color coding to '{col_name}' column")
         
         print(f"📊 Created Detailed Metrics sheet with {len(detailed_data)} files and {len(detailed_df.columns)} metrics")
     
@@ -2369,6 +2459,40 @@ class ProfessionalDesktopImageQualityAnalyzer:
                 worksheet.set_column(i, i, 20)
             else:
                 worksheet.set_column(i, i, 15)
+        
+        # Add comprehensive status color coding to Quality Breakdown sheet
+        status_columns = []
+        for col_num, col_name in enumerate(breakdown_df.columns):
+            # Look for any status-related columns (including category status columns)
+            if any(keyword in str(col_name).upper() for keyword in ['STATUS', 'COMPLIANT', 'COMPLIANCE']) and 'File' not in str(col_name):
+                status_columns.append((col_num, col_name))
+        
+        print(f"   🎨 Found {len(status_columns)} status columns in Quality Breakdown sheet")
+        
+        for col_num, col_name in status_columns:
+            col_letter = chr(65 + col_num)
+            last_row = 3 + len(breakdown_df) - 1
+            range_str = f"{col_letter}3:{col_letter}{last_row}"
+            
+            # Green for positive statuses
+            for positive_status in ['PASS', 'EXCELLENT', 'GOOD', 'COMPLIANT', 'YES']:
+                worksheet.conditional_format(range_str, {
+                    'type': 'text', 'criteria': 'containing', 'value': positive_status, 'format': success_format
+                })
+            
+            # Yellow for warning statuses
+            for warning_status in ['WARN', 'WARNING', 'ACCEPTABLE']:
+                worksheet.conditional_format(range_str, {
+                    'type': 'text', 'criteria': 'containing', 'value': warning_status, 'format': warning_format
+                })
+            
+            # Red for failure statuses
+            for failure_status in ['FAIL', 'POOR', 'BAD', 'NON_COMPLIANT', 'NO']:
+                worksheet.conditional_format(range_str, {
+                    'type': 'text', 'criteria': 'containing', 'value': failure_status, 'format': fail_format
+                })
+                
+            print(f"      • Applied color coding to '{col_name}' column")
         
         print(f"📊 Created Quality Breakdown sheet with {len(breakdown_data)} files and detailed category analysis")
     
