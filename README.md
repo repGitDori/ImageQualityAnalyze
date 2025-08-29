@@ -23,6 +23,20 @@ pip install -r requirements.txt
 
 ## Quick Start
 
+### GUI Interfaces (Recommended)
+
+**Main Interface:** `desktop_analyzer.py` - Complete professional interface
+```bash
+python desktop_analyzer.py
+# OR double-click: launch_analyzer.bat
+```
+
+**Alternative Interfaces:** Located in `Extra/` folder
+- **Tabbed:** `python Extra/tabbed_analyzer.py` (clean 3-tab workflow)
+- **Wizard:** `python Extra/wizard_analyzer.py` (step-by-step guidance)
+
+### Programmatic Usage
+
 ```python
 from image_quality_analyzer import ImageQualityAnalyzer, load_default_config
 

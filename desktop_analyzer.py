@@ -2480,6 +2480,108 @@ class ProfessionalDesktopImageQualityAnalyzer:
             self.current_image_path = file_path
             self.progress_var.set(f"Ready to analyze: {os.path.basename(file_path)}")
     
+    def show_help(self):
+        """Show help popup with user guide from local text file"""
+        help_window = tk.Toplevel(self.root)
+        help_window.title("❓ Help - Professional Image Quality Analyzer")
+        help_window.geometry("800x600")
+        help_window.transient(self.root)
+        help_window.grab_set()
+        
+        # Center the help window
+        help_window.update_idletasks()
+        x = (help_window.winfo_screenwidth() // 2) - (help_window.winfo_width() // 2)
+        y = (help_window.winfo_screenheight() // 2) - (help_window.winfo_height() // 2)
+        help_window.geometry(f"+{x}+{y}")
+        
+        # Create main frame with padding
+        main_frame = ttk.Frame(help_window, padding="15")
+        main_frame.pack(fill="both", expand=True)
+        
+        # Create scrollable text widget
+        text_frame = ttk.Frame(main_frame)
+        text_frame.pack(fill="both", expand=True)
+        
+        # Text widget with scrollbar
+        help_text = tk.Text(
+            text_frame,
+            wrap=tk.WORD,
+            font=('Segoe UI', 10),
+            padx=10,
+            pady=10,
+            relief='flat',
+            bg='#ffffff',
+            fg='#2c3e50'
+        )
+        
+        scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=help_text.yview)
+        help_text.configure(yscrollcommand=scrollbar.set)
+        
+        help_text.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Load help content from local file
+        try:
+            help_file_path = os.path.join(os.path.dirname(__file__), 'help_guide.txt')
+            if os.path.exists(help_file_path):
+                with open(help_file_path, 'r', encoding='utf-8') as f:
+                    help_content = f.read()
+            else:
+                help_content = """# 🏢 Professional Image Quality Analyzer - Help
+
+## 🚀 Quick Start Guide
+
+1. **📁 Select Image** - Click "Browse Files" to choose your document image
+2. **⚙️ Choose Standards** - Select quality standards from dropdown
+3. **🚀 Analyze** - Click "Analyze Quality" to start analysis
+4. **📋 Export** - Save results as JSON or view detailed reports
+
+## 🛡️ Security & Privacy
+- ✅ 100% Offline - No internet connection required
+- ✅ Local Processing - Images never leave your computer
+- ✅ Complete Privacy Protection
+
+For more detailed help, please refer to the documentation files in the application folder.
+"""
+        except Exception as e:
+            help_content = f"""# Help Content Error
+
+Sorry, there was an error loading the help file: {str(e)}
+
+## Basic Usage:
+1. Select an image file using the Browse button
+2. Choose your quality standards
+3. Click Analyze Quality to start analysis
+4. View results in the tabs below
+5. Export reports as needed
+
+The application works completely offline for your security and privacy.
+"""
+        
+        # Insert help content
+        help_text.insert("1.0", help_content)
+        help_text.configure(state='disabled')  # Make it read-only
+        
+        # Configure text styling for headers and sections
+        help_text.tag_configure("header", font=('Segoe UI', 12, 'bold'), foreground='#2980b9')
+        help_text.tag_configure("subheader", font=('Segoe UI', 11, 'bold'), foreground='#34495e')
+        
+        # Button frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill="x", pady=(10, 0))
+        
+        # Close button
+        close_button = ttk.Button(
+            button_frame,
+            text="✓ Close Help",
+            command=help_window.destroy,
+            style="Accent.TButton"
+        )
+        close_button.pack(side="right")
+        
+        # Focus the help window
+        help_window.focus_set()
+
     def start_analysis(self):
         """Start the image analysis with modern progress tracking"""
         if not self.current_image_path or not os.path.exists(self.current_image_path):
@@ -2977,9 +3079,9 @@ class ProfessionalDesktopImageQualityAnalyzer:
         # Add title
         worksheet.merge_range('A1:F1', '📊 DETAILED QUALITY METRICS', header_format)
         
-        # Add proper headers with formatting
+        # Format the column headers that pandas already created
         for col_num, column_title in enumerate(metrics_df.columns):
-            worksheet.write(1, col_num, column_title, metric_header_format)
+            worksheet.write(2, col_num, column_title, metric_header_format)
         
         # Format columns
         worksheet.set_column('A:A', 20)  # Metric
@@ -2990,7 +3092,7 @@ class ProfessionalDesktopImageQualityAnalyzer:
         worksheet.set_column('F:F', 40)  # Details
         
         # Apply conditional formatting based on status
-        for row_num, row_data in enumerate(metrics_rows, start=4):  # Start from row 4 now
+        for row_num, row_data in enumerate(metrics_rows, start=3):  # Start from row 3 now
             status = row_data['Status']
             if status == 'EXCELLENT':
                 format_to_use = good_format
@@ -3070,9 +3172,9 @@ class ProfessionalDesktopImageQualityAnalyzer:
             # Add title safely
             self.safe_merge_range(worksheet, 'A1:C1', '💡 QUALITY IMPROVEMENT RECOMMENDATIONS', header_format)
             
-            # Add proper headers with formatting
+            # Format the column headers that pandas already created
             for col_num, column_title in enumerate(rec_df.columns):
-                worksheet.write(1, col_num, column_title, metric_header_format)
+                worksheet.write(2, col_num, column_title, metric_header_format)
             
             # Format columns
             worksheet.set_column('A:A', 15)  # Priority

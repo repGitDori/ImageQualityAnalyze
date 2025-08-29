@@ -2,7 +2,7 @@
 
 ## System Overview
 
-The Image Quality Analyzer is a comprehensive desktop application built with Python that provides professional document image quality analysis. The system follows a modular architecture with clear separation of concerns between GUI, analysis engine, metrics computation, and data export.
+The Image Quality Analyzer is a comprehensive, enterprise-grade desktop application built with Python that provides professional document image quality analysis with complete offline operation. The system follows a modular architecture with clear separation of concerns between GUI, analysis engine, metrics computation, data visualization, and advanced reporting capabilities.
 
 ## High-Level Architecture
 
@@ -14,6 +14,8 @@ The Image Quality Analyzer is a comprehensive desktop application built with Pyt
 │  - Professional Interface  │  - Browser Access    │  - Batch    │
 │  - Real-time Analysis     │  - Upload Interface   │  - Scripted │
 │  - Excel Export           │  - Results Display    │  - CI/CD    │
+│  - Quality Standards Editor│ - Modern UI/UX       │  - Automated│
+│  - Batch Processing       │  - RESTful API        │  - JSON Out │
 └─────────────────────────────────────────────────────────────────┘
                                     │
 ┌─────────────────────────────────────────────────────────────────┐
@@ -23,6 +25,7 @@ The Image Quality Analyzer is a comprehensive desktop application built with Pyt
 │  - Workflow Orchestration    │  - Configuration Management      │
 │  - Result Processing         │  - Profile Management            │
 │  - Error Handling           │  - Validation Logic               │
+│  - Threading & Async        │  - Security & Privacy             │
 └─────────────────────────────────────────────────────────────────┘
                                     │
 ┌─────────────────────────────────────────────────────────────────┐
@@ -50,6 +53,7 @@ The Image Quality Analyzer is a comprehensive desktop application built with Pyt
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐│
 │  │ Matplotlib  │ │ Dashboard   │ │ Excel       │ │ JSON        ││
 │  │ Charts      │ │ Generator   │ │ Reports     │ │ Export      ││
+│  │ (Enhanced)  │ │ (Enhanced)  │ │ (9-Sheet)   │ │ (Enhanced)  ││
 │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘│
 └─────────────────────────────────────────────────────────────────┘
                                     │
@@ -72,33 +76,42 @@ The Image Quality Analyzer is a comprehensive desktop application built with Pyt
 - **Framework**: Python Tkinter with TTK styling
 - **Architecture Pattern**: Model-View-Controller (MVC)
 - **Key Features**:
-  - Professional multi-tab interface
-  - Real-time progress indication
-  - Quality standards editor
-  - Batch processing capabilities
-  - Comprehensive Excel export system
+  - Professional multi-tab interface with modern styling
+  - Real-time progress indication with threading
+  - Advanced Quality Standards Editor with preset configurations
+  - Comprehensive batch processing with parallel execution
+  - Enterprise-grade Excel export system (9 comprehensive sheets)
+  - Security-first design (100% offline operation)
+  - Fixed Excel header duplication issue (2025 update)
 
 ```python
 ProfessionalDesktopImageQualityAnalyzer
 ├── GUI Components
-│   ├── MainWindow (Root container)
-│   ├── ControlPanel (File selection, analysis controls)
-│   ├── ResultsNotebook (Tabbed results display)
-│   │   ├── SummaryTab
-│   │   ├── MetricsTab
-│   │   ├── RawDataTab
-│   │   └── RecommendationsTab
-│   ├── QualityStandardsEditor
-│   └── ProgressIndicators
+│   ├── MainWindow (Root container with modern styling)
+│   ├── ControlPanel (File selection, profile management)
+│   ├── ResultsNotebook (Enhanced tabbed interface)
+│   │   ├── SummaryTab (Executive overview)
+│   │   ├── MetricsTab (Detailed quality metrics)
+│   │   ├── VisualizationTab (Charts and graphs)
+│   │   ├── RawDataTab (Technical measurements)
+│   │   └── RecommendationsTab (Actionable insights)
+│   ├── QualityStandardsEditor (Advanced configuration UI)
+│   │   ├── Resolution Standards
+│   │   ├── Exposure Settings
+│   │   ├── Sharpness Thresholds
+│   │   ├── Geometry Tolerances
+│   │   ├── Completeness Criteria
+│   │   └── Scoring Parameters
+│   └── ProgressIndicators (Threaded background processing)
 ├── Event Handlers
-│   ├── FileSelection
-│   ├── AnalysisExecution
-│   ├── BatchProcessing
-│   └── ExportOperations
+│   ├── FileSelection (Single & batch file handling)
+│   ├── AnalysisExecution (Threaded processing)
+│   ├── BatchProcessing (Parallel execution with error tracking)
+│   └── ExportOperations (Excel, JSON, visual exports)
 └── Data Binding
-    ├── ConfigurationSync
-    ├── ResultsDisplay
-    └── StatusUpdates
+    ├── ConfigurationSync (Real-time profile updates)
+    ├── ResultsDisplay (Live result updates)
+    └── StatusUpdates (Progress tracking)
 ```
 
 #### Web UI (`web_ui/`)
@@ -230,16 +243,26 @@ class GraphGenerator:
 ```
 
 #### Excel Reporting System
-**9 Professional Excel Sheets:**
-1. **Executive Summary** - High-level overview and scores
-2. **Detailed Metrics** - Complete metric breakdown with scoring
-3. **Raw Data Analysis** - 120+ technical measurements per image
-4. **Quality Recommendations** - Actionable improvement suggestions
-5. **Color Coding Guide** - Legend for all visual indicators
-6. **Charts & Visualizations** - Embedded charts and graphs
-7. **Batch Analysis Results** - Multi-image analysis summaries
-8. **Failed Analysis Log** - Error tracking and diagnostics
-9. **Technical Specifications** - Configuration and metadata
+**Enterprise-Grade Excel Export with 9 Comprehensive Sheets:**
+
+1. **Executive Summary** - High-level overview with key metrics and scores
+2. **Detailed Metrics** - Complete metric breakdown with color-coded status indicators
+3. **Quality Improvement Recommendations** - Priority-based actionable suggestions  
+4. **Visual Charts** - Embedded charts and metric visualizations
+5. **Batch Summary** - Multi-image analysis overview (batch mode)
+6. **Successful Analysis** - Detailed results for processed images (batch mode)
+7. **Raw Measurements** - 120+ technical measurements per image (batch mode)
+8. **Failed Analysis Log** - Comprehensive error tracking and diagnostics (batch mode)
+9. **Statistics & Trends** - Error analysis and performance patterns (batch mode)
+
+**Key Features (2025 Updates):**
+- ✅ **Fixed duplicate header issue** - Clean, professional table structure
+- 🎨 **Professional formatting** with color-coded status indicators
+- 📊 **Conditional formatting** for immediate visual quality assessment
+- 📈 **Embedded charts and graphs** for data visualization
+- 🔍 **Comprehensive metadata** including analysis timestamps and configurations
+- 📁 **Auto-organized output structure** with timestamped filenames
+- 🛡️ **Error resilience** with graceful handling of missing data
 
 ### 5. Data Layer
 
@@ -367,6 +390,27 @@ config/
 - **API Backend**: Separate Python backend service
 - **Docker Support**: Containerized deployment
 - **Cloud Ready**: Scalable cloud deployment options
+
+## Recent Updates & Improvements (2025)
+
+### Excel Export System Enhancements
+- **🔧 Fixed duplicate header issue** in single-image Excel reports
+  - Resolved duplicate headers in "Detailed Metrics" table
+  - Resolved duplicate headers in "Recommendations" table
+  - Clean, professional table structure with single title row and single header row
+  - Updated row positioning logic for consistent formatting
+
+### Quality Assurance Improvements
+- **✅ Enhanced error handling** for edge cases in batch processing
+- **📊 Improved data validation** for metric calculations
+- **🎨 Professional visual formatting** with consistent color schemes
+- **🔍 Better debugging output** for troubleshooting analysis issues
+
+### Performance & Reliability
+- **⚡ Optimized threading** for GUI responsiveness during analysis
+- **🛡️ Enhanced security model** with 100% offline operation
+- **📁 Improved file handling** for various image formats
+- **🔄 Better error recovery** mechanisms
 
 ## Development Workflow
 

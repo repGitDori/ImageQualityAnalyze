@@ -2,8 +2,32 @@
 
 Three professional interfaces for comprehensive document image quality analysis:
 
-## 📑 **Tabbed Interface (RECOMMENDED)**
-**File:** `tabbed_analyzer.py` | **Launcher:** `launch_tabbed.bat`
+## 🏢 **Desktop Interface (MAIN INTERFACE)**
+**File:** `desktop_analyzer.py` | **Launcher:** `launch_analyzer.bat`
+
+A comprehensive single-page interface with all features visible - **this is the main interface**:
+
+### ✨ **Features:**
+- **Complete Dashboard** - All tools and options in one professional view
+- **Custom Standards Editor** - Built-in editor for creating quality standards
+- **Batch Processing** - Analyze multiple images at once
+- **Advanced Visualizations** - Detailed charts and graphs
+- **Export Options** - Multiple format support
+- **Help System** - Built-in help with ❓ button
+
+### 🚀 **Quick Start:**
+```bash
+# Double-click to launch (MAIN INTERFACE)
+launch_analyzer.bat
+
+# Or run directly
+python desktop_analyzer.py
+```
+
+---
+
+## 📑 **Tabbed Interface (Alternative)**
+**File:** `Extra/tabbed_analyzer.py` | **Launcher:** `launch_tabbed.bat`
 
 A clean, professional 3-tab interface that organizes the workflow logically:
 
@@ -25,49 +49,35 @@ A clean, professional 3-tab interface that organizes the workflow logically:
 launch_tabbed.bat
 
 # Or run directly  
-python tabbed_analyzer.py
+python Extra/tabbed_analyzer.py
 ```
 
 ---
 
-## 🧙‍♂️ Wizard Interface (Step-by-Step)
-**File:** `wizard_analyzer.py` | **Launcher:** `launch_wizard.bat`
+## 🧙‍♂️ **Wizard Interface (Alternative)**
+**File:** `Extra/wizard_analyzer.py` | **Launcher:** `launch_wizard.bat`
 
 A step-by-step guided process for users who prefer sequential workflow:
 
-### ✨ Features:
+### ✨ **Features:**
 - **5-Step Process:** Clear, guided workflow from image selection to results
 - **Progress Tracking:** Visual progress bar and step indicators
 - **Smart Validation:** Prevents errors by validating each step
 
-### 📝 The 5 Steps:
+### 📝 **The 5 Steps:**
 1. **Select Image** - Choose your document image file
 2. **Quality Standards** - Select default or custom quality criteria  
 3. **Analysis Options** - Configure visualizations and export settings
 4. **Run Analysis** - Watch the progress as your image is analyzed
 5. **View Results** - See results summary with options to view details or export
 
----
-
-## 🏢 Professional Interface (Advanced Users)
-**File:** `desktop_analyzer.py` | **Launcher:** `launch_analyzer.bat`
-
-A comprehensive single-page interface with all features visible:
-
-### ✨ Features:
-- **Complete Dashboard** - All tools and options in one view
-- **Custom Standards Editor** - Built-in editor for creating quality standards
-- **Batch Processing** - Analyze multiple images at once
-- **Advanced Visualizations** - Detailed charts and graphs
-- **Export Options** - Multiple format support
-
-### 🚀 Quick Start:
+### 🚀 **Quick Start:**
 ```bash
-# Double-click to launch  
-launch_analyzer.bat
+# Double-click to launch
+launch_wizard.bat
 
-# Or run directly
-python desktop_analyzer.py
+# Or run directly  
+python Extra/wizard_analyzer.py
 ```
 
 ---
@@ -120,31 +130,32 @@ Both interfaces provide:
 
 ## 🎯 Which Interface to Choose?
 
-### Choose **Tabbed Interface** if you:
-- ⭐ Want a clean, organized workflow
-- ⭐ Like having all options visible in logical tabs
-- ⭐ Prefer modern tabbed application design
-- ⭐ Want image preview before analysis
-- ⭐ Need flexibility to switch between steps
-
-### Choose **Wizard Interface** if you:
-- 🧙 Are new to image quality analysis
-- 🧙 Want step-by-step guidance with validation
-- 🧙 Prefer linear workflow with progress tracking
-- 🧙 Like detailed instructions at each step
-- 🧙 Want to prevent skipping important steps
-
-### Choose **Professional Interface** if you:
+### Use **Desktop Interface** (MAIN) if you:
+- 🏢 Want the complete professional experience
 - 🏢 Need all features accessible at once
 - 🏢 Work with image analysis regularly  
 - 🏢 Want to create custom quality standards
 - 🏢 Need batch processing capabilities
 - 🏢 Prefer advanced control over all options
 
+### Try **Tabbed Interface** if you:
+- ⭐ Want a clean, organized workflow
+- ⭐ Like having all options visible in logical tabs
+- ⭐ Prefer modern tabbed application design
+- ⭐ Want image preview before analysis
+- ⭐ Need flexibility to switch between steps
+
+### Try **Wizard Interface** if you:
+- 🧙 Are new to image quality analysis
+- 🧙 Want step-by-step guidance with validation
+- 🧙 Prefer linear workflow with progress tracking
+- 🧙 Like detailed instructions at each step
+- 🧙 Want to prevent skipping important steps
+
 ---
 
 ## 📞 Support
 
-Both interfaces provide the same powerful analysis engine with professional-grade accuracy. Choose based on your workflow preferences and experience level.
+All interfaces provide the same powerful analysis engine with professional-grade accuracy. Choose based on your workflow preferences and experience level.
 
 **Happy analyzing!** 🎉

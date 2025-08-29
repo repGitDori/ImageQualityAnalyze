@@ -14,7 +14,8 @@ from pathlib import Path
 
 # Add the current directory to the path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
 try:
     from image_quality_analyzer import ImageQualityAnalyzer
@@ -147,13 +148,26 @@ class ImageQualityWizard:
         header_frame = ttk.Frame(self.main_container)
         header_frame.pack(fill='x', pady=(0, 20))
         
-        # Title
+        # Title section with help button
+        title_section = ttk.Frame(header_frame)
+        title_section.pack(fill='x', pady=(0, 15))
+        
+        # Title (left side)
         title_label = ttk.Label(
-            header_frame,
+            title_section,
             text="🔍 Image Quality Analysis Wizard",
             style='WizardTitle.TLabel'
         )
-        title_label.pack(pady=(0, 15))
+        title_label.pack(side='left')
+        
+        # Help button (right side)
+        self.help_button = ttk.Button(
+            title_section,
+            text="❓",
+            command=self.show_help,
+            width=3
+        )
+        self.help_button.pack(side='right')
         
         # Progress section
         progress_frame = ttk.Frame(header_frame)
@@ -663,6 +677,120 @@ class ImageQualityWizard:
         if self.current_step < self.total_steps - 1:
             self.next_button.config(state='normal' if valid else 'disabled')
     
+    def show_help(self):
+        """Show help popup with user guide from local text file"""
+        help_window = tk.Toplevel(self.root)
+        help_window.title("❓ Help - Image Quality Analysis Wizard")
+        help_window.geometry("800x600")
+        help_window.transient(self.root)
+        help_window.grab_set()
+        
+        # Center the help window
+        help_window.update_idletasks()
+        x = (help_window.winfo_screenwidth() // 2) - (help_window.winfo_width() // 2)
+        y = (help_window.winfo_screenheight() // 2) - (help_window.winfo_height() // 2)
+        help_window.geometry(f"+{x}+{y}")
+        
+        # Create main frame with padding
+        main_frame = ttk.Frame(help_window, padding="15")
+        main_frame.pack(fill="both", expand=True)
+        
+        # Create scrollable text widget
+        text_frame = ttk.Frame(main_frame)
+        text_frame.pack(fill="both", expand=True)
+        
+        # Text widget with scrollbar
+        help_text = tk.Text(
+            text_frame,
+            wrap=tk.WORD,
+            font=('Segoe UI', 10),
+            padx=10,
+            pady=10,
+            relief='flat',
+            bg='#ffffff',
+            fg='#2c3e50'
+        )
+        
+        scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=help_text.yview)
+        help_text.configure(yscrollcommand=scrollbar.set)
+        
+        help_text.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Load help content from local file
+        try:
+            help_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'help_guide.txt')
+            if os.path.exists(help_file_path):
+                with open(help_file_path, 'r', encoding='utf-8') as f:
+                    help_content = f.read()
+            else:
+                help_content = """# 🔍 Image Quality Analysis Wizard - Help
+
+## 🚀 Step-by-Step Guide
+
+### Step 1: Select Image
+1. **📁 Choose File** - Click "Browse Files" to select your document image
+2. **✅ Validation** - Ensure file is a valid image format
+
+### Step 2: Quality Standards  
+1. **⚙️ Select Profile** - Choose from Default, Strict, or Lenient standards
+2. **🔧 Custom Option** - Create your own quality thresholds if needed
+
+### Step 3: Analysis Options
+1. **📊 Visualizations** - Enable charts and graphs (optional)
+2. **📝 Reports** - Choose detailed or summary analysis
+
+### Step 4: Run Analysis
+1. **🚀 Start Analysis** - Click "Analyze" and monitor progress
+2. **⏳ Wait** - Processing happens locally and securely
+
+### Step 5: View Results
+1. **📊 Summary** - Review overall quality score and status  
+2. **📋 Details** - Examine individual metric results
+3. **💾 Export** - Save results as JSON reports
+
+## 🛡️ Security & Privacy
+- ✅ 100% Offline - No internet connection required
+- ✅ Local Processing - Images never leave your computer
+- ✅ Complete Privacy Protection
+
+The wizard guides you through each step with validation to ensure successful analysis.
+"""
+        except Exception as e:
+            help_content = f"""# Help Content Error
+
+Sorry, there was an error loading the help file: {str(e)}
+
+## Basic Wizard Usage:
+1. Step 1: Select an image file
+2. Step 2: Choose quality standards
+3. Step 3: Set analysis options
+4. Step 4: Run the analysis
+5. Step 5: View and export results
+
+The wizard prevents you from skipping steps and validates each step before proceeding.
+The application works completely offline for your security and privacy.
+"""
+        
+        # Insert help content
+        help_text.insert("1.0", help_content)
+        help_text.configure(state='disabled')  # Make it read-only
+        
+        # Button frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill="x", pady=(10, 0))
+        
+        # Close button
+        close_button = ttk.Button(
+            button_frame,
+            text="✓ Close Help",
+            command=help_window.destroy
+        )
+        close_button.pack(side="right")
+        
+        # Focus the help window
+        help_window.focus_set()
+
     def next_step(self):
         """Go to next step"""
         if self.current_step == self.total_steps - 1:

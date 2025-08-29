@@ -15,7 +15,8 @@ from PIL import Image, ImageTk
 
 # Add the current directory to the path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
 try:
     from image_quality_analyzer import ImageQualityAnalyzer
@@ -149,19 +150,35 @@ class TabbedImageQualityAnalyzer:
         header_frame = ttk.Frame(main_frame)
         header_frame.pack(fill='x', pady=(0, 20))
         
+        # Title section (left side)
+        title_section = ttk.Frame(header_frame)
+        title_section.pack(side='left', fill='x', expand=True)
+        
         title_label = ttk.Label(
-            header_frame,
+            title_section,
             text="🔍 Professional Image Quality Analyzer",
             style='MainTitle.TLabel'
         )
-        title_label.pack()
+        title_label.pack(anchor='w')
         
         subtitle_label = ttk.Label(
-            header_frame,
+            title_section,
             text="🛡️ Secure • Offline • Professional Analysis",
             style='Subtitle.TLabel'
         )
-        subtitle_label.pack(pady=(5, 0))
+        subtitle_label.pack(anchor='w', pady=(5, 0))
+        
+        # Help button section (right side)
+        help_section = ttk.Frame(header_frame)
+        help_section.pack(side='right')
+        
+        self.help_button = ttk.Button(
+            help_section,
+            text="❓",
+            command=self.show_help,
+            width=3
+        )
+        self.help_button.pack()
         
         # Create notebook (tabs)
         self.notebook = ttk.Notebook(main_frame)
@@ -555,6 +572,113 @@ class TabbedImageQualityAnalyzer:
         
         self.file_status_label.config(text=status_text)
     
+    def show_help(self):
+        """Show help popup with user guide from local text file"""
+        help_window = tk.Toplevel(self.root)
+        help_window.title("❓ Help - Professional Image Quality Analyzer")
+        help_window.geometry("800x600")
+        help_window.transient(self.root)
+        help_window.grab_set()
+        
+        # Center the help window
+        help_window.update_idletasks()
+        x = (help_window.winfo_screenwidth() // 2) - (help_window.winfo_width() // 2)
+        y = (help_window.winfo_screenheight() // 2) - (help_window.winfo_height() // 2)
+        help_window.geometry(f"+{x}+{y}")
+        
+        # Create main frame with padding
+        main_frame = ttk.Frame(help_window, padding="15")
+        main_frame.pack(fill="both", expand=True)
+        
+        # Create scrollable text widget
+        text_frame = ttk.Frame(main_frame)
+        text_frame.pack(fill="both", expand=True)
+        
+        # Text widget with scrollbar
+        help_text = tk.Text(
+            text_frame,
+            wrap=tk.WORD,
+            font=('Segoe UI', 10),
+            padx=10,
+            pady=10,
+            relief='flat',
+            bg='#ffffff',
+            fg='#2c3e50'
+        )
+        
+        scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=help_text.yview)
+        help_text.configure(yscrollcommand=scrollbar.set)
+        
+        help_text.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Load help content from local file
+        try:
+            help_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'help_guide.txt')
+            if os.path.exists(help_file_path):
+                with open(help_file_path, 'r', encoding='utf-8') as f:
+                    help_content = f.read()
+            else:
+                help_content = """# 🔍 Professional Image Quality Analyzer - Help
+
+## 🚀 Quick Start Guide
+
+### Tab 1: Upload
+1. **📁 Select Image** - Click "Browse Files" to choose your document image
+2. **👁️ Preview** - View your selected image before analysis
+
+### Tab 2: Config  
+1. **⚙️ Choose Standards** - Select quality standards from dropdown
+2. **🎯 Set Options** - Enable visualizations and detailed reports
+
+### Tab 3: Analysis
+1. **🚀 Analyze** - Click "Analyze Quality" to start analysis
+2. **📋 Results** - View comprehensive analysis results
+3. **📋 Export** - Save results as JSON reports
+
+## 🛡️ Security & Privacy
+- ✅ 100% Offline - No internet connection required
+- ✅ Local Processing - Images never leave your computer
+- ✅ Complete Privacy Protection
+
+For more detailed help, please refer to the documentation files in the application folder.
+"""
+        except Exception as e:
+            help_content = f"""# Help Content Error
+
+Sorry, there was an error loading the help file: {str(e)}
+
+## Basic Usage:
+1. Upload Tab: Select an image file using the Browse button
+2. Config Tab: Choose your quality standards and options
+3. Analysis Tab: Click Analyze Quality to start analysis and view results
+
+The application works completely offline for your security and privacy.
+"""
+        
+        # Insert help content
+        help_text.insert("1.0", help_content)
+        help_text.configure(state='disabled')  # Make it read-only
+        
+        # Configure text styling for headers and sections
+        help_text.tag_configure("header", font=('Segoe UI', 12, 'bold'), foreground='#2980b9')
+        help_text.tag_configure("subheader", font=('Segoe UI', 11, 'bold'), foreground='#34495e')
+        
+        # Button frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill="x", pady=(10, 0))
+        
+        # Close button
+        close_button = ttk.Button(
+            button_frame,
+            text="✓ Close Help",
+            command=help_window.destroy
+        )
+        close_button.pack(side="right")
+        
+        # Focus the help window
+        help_window.focus_set()
+
     def on_tab_changed(self, event):
         """Handle tab change events"""
         selected_tab = self.notebook.select()
