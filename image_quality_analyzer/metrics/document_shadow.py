@@ -90,16 +90,22 @@ class DocumentShadowMetric(BaseMetrics):
         self.canny_low = self.config.get('canny_low', 50)  # Canny edge detection low threshold
         self.canny_high = self.config.get('canny_high', 150)  # Canny edge detection high threshold
         
-    def analyze(self, image):
+    def analyze(self, image, config=None):
         """
         Analyze image for document shadow presence and characteristics
         
         Args:
             image: Input image (PIL Image or numpy array)
+            config: Optional configuration override
             
         Returns:
             dict: Analysis results containing shadow metrics
         """
+        # Use provided config or instance config
+        if config:
+            # Update instance config with provided config
+            for key, value in config.items():
+                setattr(self, key, value)
         try:
             # Step 1: Preprocessing
             gray_image = ensure_grayscale(image)
