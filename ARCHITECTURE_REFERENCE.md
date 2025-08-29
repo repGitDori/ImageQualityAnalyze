@@ -1,13 +1,23 @@
 # Architecture Quick Reference
 
-## 🏗️ System Overview
-**Image Quality Analyzer** - Professional document quality analysis system with modular architecture.
+##### 3. **Metrics Layer** - Analysis Engines
+```
+┌─ Base Metric Interface ─┬─ 13+ Specialized Metrics ────────┐
+│  • analyze()            │  📸 Sharpness  📊 Contrast      │
+│  • get_score()          │  💡 Exposure   🔊 Noise         │
+│  • get_recommendations()│  📏 Resolution 📐 Geometry      │
+│                         │  🌑 Shadow     📋 Complete      │
+└──────────────────────────┴──────────────────────────────────┘
+```tem Overview
+**Image Quality Analyzer** - Enterprise-grade document quality analysis system with modular architecture and security-first design.
 
 ## 🎯 Core Principles
-- **Modular Design**: Independent, swappable components
-- **Plugin Architecture**: Extensible metrics system
-- **Configuration-Driven**: JSON-based customizable profiles
-- **Multi-Interface**: Desktop GUI, Web UI, CLI support
+- **Modular Design**: Independent, swappable components with clear interfaces
+- **Plugin Architecture**: Extensible metrics system with hot-swappable modules
+- **Configuration-Driven**: JSON-based customizable profiles for industry standards
+- **Multi-Interface**: Desktop GUI, Web UI, CLI support for different workflows
+- **Security-First**: 100% offline operation with local processing only
+- **Enterprise-Ready**: Professional reporting with comprehensive Excel exports
 
 ## 📊 Layer Architecture
 
@@ -16,8 +26,10 @@
 ┌─ Desktop GUI (Tkinter) ─┬─ Web UI (Vue.js) ─┬─ CLI Tool ─┐
 │  • Professional tabs    │  • Browser access │  • Batch   │
 │  • Real-time progress   │  • Upload/analyze │  • Script  │
-│  • Excel export        │  • Results display │  • CI/CD   │
-└─────────────────────────┴───────────────────┴───────────┘
+│  • Excel export (9 sht) │  • Results display│  • CI/CD   │
+│  • Standards editor     │  • Modern UI/UX   │  • JSON    │
+│  • Batch processing     │  • RESTful API    │  • Auto    │
+└─────────────────────────┴───────────────────┴────────────┘
 ```
 
 ### 2. **Application Layer** - Core Engine
@@ -26,7 +38,8 @@
 │  • analyze_image()     │  • Profiles     │  • Weighted   │
 │  • run_metrics()       │  • Thresholds   │  • P/W/F      │
 │  • compile_results()   │  • Validation   │  • Confidence │
-└─────────────────────────┴─────────────────┴──────────────┘
+│  • threading support   │  • Standards    │  • Star rating│
+└────────────────────────┴─────────────────┴───────────────┘
 ```
 
 ### 3. **Metrics Layer** - Analysis Engines
@@ -35,16 +48,19 @@
 │  • analyze()            │  📸 Sharpness  📊 Contrast      │
 │  • get_score()          │  💡 Exposure   🔊 Noise         │
 │  • get_recommendations()│  📏 Resolution 📐 Geometry      │
-└──────────────────────────┴──────────────────────────────────┘
+└─────────────────────────┴──────────────────────────────────┘
 ```
 
 ### 4. **Visualization Layer** - Reporting
 ```
 ┌─ Chart Generator ─┬─ Excel Reports (9 Sheets) ─┬─ JSON/CSV ─┐
-│  • Dashboards     │  • Executive Summary       │  • Raw     │
-│  • Histograms     │  • Detailed Metrics        │  • Batch   │
-│  • Heatmaps       │  • Recommendations         │  • Config  │
-└────────────────────┴────────────────────────────┴───────────┘
+│  • Dashboards     │  ✅ Executive Summary      │  • Raw     │
+│  • Histograms     │  ✅ Detailed Metrics*      │  • Batch   │
+│  • Heatmaps       │  ✅ Recommendations*       │  • Config  │
+│  • Trend charts   │  • Visual Charts           │  • Export  │
+│  • Quality gauge  │  • Batch Analysis          │  • Meta    │
+└────────────────────┴───────────────────────────┴────────────┘
+   *Fixed duplicate headers (2025 update)
 ```
 
 ### 5. **Data Layer** - Configuration & Storage
@@ -53,7 +69,17 @@
 │  • Thresholds  │  • Document        │  • Analysis reports  │
 │  • Metrics     │  • Photo           │  • Visualization     │
 │  • Validation  │  • ID Card         │  • Temp files        │
+│  • Security    │  • Custom          │  • Audit trails      │
 └────────────────┴────────────────────┴──────────────────────┘
+```
+
+## 🔒 Security Architecture
+```
+┌─ Privacy First ─┬─ Input Validation ─┬─ Data Protection ────┐
+│  🛡️ 100% offline │  📁 File type check│  🔐 Local only     │
+│  🚫 No telemetry │  📏 Size limits    │  🧹 Temp cleanup   │
+│  🔒 Local proc.  │  🛡️ Path sanitize  │  ✅ Config valid.  │
+└──────────────────┴────────────────────┴─────────────────────┘
 ```
 
 ## 🔌 Key Components
@@ -65,6 +91,10 @@ ImageQualityAnalyzer          # Primary analysis orchestrator
 QualityScoring               # Scoring and classification system
 ConfigurationManager         # Profile and settings management
 
+# Desktop UI (2025 Enhanced)
+ProfessionalDesktopImageQualityAnalyzer  # Main GUI application
+QualityStandardsEditor                   # Advanced configuration UI
+
 # Metrics System
 BaseMetric                   # Interface for all metrics
 SharpnessMetric             # Laplacian, Sobel, FFT analysis
@@ -73,9 +103,9 @@ ExposureMetric              # Brightness, histogram analysis
 GeometryMetric              # Skew detection, boundaries
 # ... 8 more specialized metrics
 
-# Visualization
+# Visualization & Export (2025 Enhanced)
 GraphGenerator              # Chart creation and export
-ExcelReporter               # 9-sheet professional reports
+ExcelReporter               # 9-sheet professional reports ✅ Fixed headers
 VisualizationManager        # Dashboard generation
 ```
 
@@ -99,10 +129,31 @@ image_quality_analyzer/
     ├── completeness.py    #    Content coverage
     ├── foreign_objects.py #    Unwanted objects
     ├── format_integrity.py#    File validation
+    ├── document_shadow.py #    Document shadow detection
     └── utils.py           #    Shared utilities
 ```
 
-## 🎨 Design Patterns
+## � Recent Updates (2025)
+
+### ✅ **Excel Export Improvements**
+- **Fixed duplicate header issue** in single-image reports
+- **Clean table structure** with single title and header rows
+- **Professional formatting** with color-coded status indicators
+- **Consistent row positioning** across all sheets
+
+### 🔧 **System Enhancements**
+- **Enhanced error handling** for edge cases in analysis
+- **Improved threading** for better GUI responsiveness
+- **Better validation** for metric calculations and configurations
+- **Optimized memory usage** for large image processing
+
+### 🛡️ **Security Improvements**
+- **Reinforced offline-only architecture** 
+- **Enhanced input validation** for security
+- **Improved error sanitization** to prevent information leakage
+- **Stronger file handling** with better path validation
+
+## �🎨 Design Patterns
 
 ### 1. **Plugin Architecture**
 - Metrics as independent plugins
@@ -215,10 +266,36 @@ analyzer.update_config(config)
 - Exposure latitude
 
 ### ID Card Profile
-- High resolution requirements
+- High resolution requirements (600+ DPI)
 - Face detection ready
 - Security features preservation
 - Uniform background preference
+
+### Custom Profiles
+- **Enterprise**: High standards for business documents
+- **Archival**: Maximum quality for long-term preservation
+- **Government**: Compliance with regulatory requirements
+- **Healthcare**: HIPAA-compliant processing standards
+
+## 🏛️ Industry Standards Support
+
+### Digital Archiving Standards
+- **ISO 21500** compliance for digital preservation
+- **300+ DPI** minimum for text documents
+- **600+ DPI** for archival quality
+- **Metadata preservation** for long-term storage
+
+### Government & Legal Standards
+- **Audit trail** with comprehensive logging
+- **Chain of custody** documentation
+- **Error tracking** and failure analysis
+- **Reproducible results** with saved configurations
+
+### Healthcare & Privacy Standards
+- **HIPAA-compliant** local-only processing
+- **Zero data transmission** architecture
+- **Secure temporary file handling**
+- **Privacy by design** implementation
 
 ## 🛠️ Extension Points
 
@@ -321,6 +398,44 @@ class CustomExporter:
 - Automatic temp cleanup
 - Configuration validation
 - Sanitized error messages
+
+---
+
+## 🎯 Architecture Summary
+
+**Image Quality Analyzer** is an **enterprise-grade, security-first document analysis system** that combines:
+
+### 🏗️ **Robust Architecture**
+- **Modular design** with clear separation of concerns
+- **Plugin-based metrics** for extensibility and customization
+- **Multi-interface support** (Desktop, Web, CLI) for diverse workflows
+- **Configuration-driven** analysis with industry-specific profiles
+
+### 🛡️ **Security & Privacy Excellence**
+- **100% offline operation** with zero data transmission
+- **Local processing only** suitable for sensitive documents
+- **Privacy by design** architecture with comprehensive input validation
+- **Enterprise security** standards with audit trail capabilities
+
+### 📊 **Professional Reporting**
+- **9-sheet Excel exports** with comprehensive analysis data
+- **Real-time visualization** with charts, dashboards, and heatmaps
+- **Multiple export formats** (Excel, JSON, CSV, PNG) for different needs
+- **Color-coded indicators** for immediate quality assessment
+
+### ⚡ **Performance & Reliability**
+- **Multi-threaded processing** for GUI responsiveness
+- **Optimized memory management** for large image handling
+- **Comprehensive error handling** with graceful degradation
+- **Batch processing** with parallel execution and error tracking
+
+### 🎯 **Industry Compliance**
+- **Multiple quality standards** (ISO, Government, Healthcare, Digital Archiving)
+- **Configurable thresholds** and validation rules for different industries
+- **Comprehensive documentation** and audit capabilities
+- **Professional quality assurance** with statistical analysis
+
+This architecture provides a **production-ready foundation** for organizations requiring **high-quality document image analysis** with stringent **security, compliance, and performance requirements**.
 
 ---
 

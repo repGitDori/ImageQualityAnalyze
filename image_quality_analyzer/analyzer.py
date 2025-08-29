@@ -48,7 +48,8 @@ class ImageQualityAnalyzer:
             'border_background': BorderBackgroundMetrics(),
             'noise': NoiseMetrics(),
             'format_integrity': FormatIntegrityMetrics(),
-            'resolution': ResolutionMetrics()
+            'resolution': ResolutionMetrics(),
+            'document_shadow': DocumentShadowMetric()
         }
         
         # Initialize scorer

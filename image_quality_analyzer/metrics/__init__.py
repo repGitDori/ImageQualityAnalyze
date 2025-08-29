@@ -2,6 +2,7 @@
 Metrics computation modules for image quality analysis
 """
 
+from .base import BaseMetrics, DocumentMaskGenerator
 from .completeness import CompletenessMetrics
 from .foreign_objects import ForeignObjectsMetrics  
 from .sharpness import SharpnessMetrics
@@ -13,7 +14,7 @@ from .border_background import BorderBackgroundMetrics
 from .noise import NoiseMetrics
 from .format_integrity import FormatIntegrityMetrics
 from .resolution import ResolutionMetrics
-from .base import BaseMetrics, DocumentMaskGenerator
+from .document_shadow import DocumentShadowMetric
 
 __all__ = [
     'BaseMetrics',
@@ -28,5 +29,6 @@ __all__ = [
     'BorderBackgroundMetrics',
     'NoiseMetrics',
     'FormatIntegrityMetrics',
-    'ResolutionMetrics'
+    'ResolutionMetrics',
+    'DocumentShadowMetric'
 ]

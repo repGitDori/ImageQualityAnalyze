@@ -28,7 +28,8 @@ class QualityScorer:
             'border_background': 1.0,
             'noise': 1.0,
             'format_integrity': 1.0,
-            'resolution': 1.0
+            'resolution': 1.0,
+            'document_shadow': config.get('scoring', {}).get('three_star_weight', 1.0)
         }
         
         # Categories that trigger hard fail if they fail
@@ -82,6 +83,8 @@ class QualityScorer:
             return self._score_format_integrity(metrics, config_cat)
         elif category == 'resolution':
             return self._score_resolution(metrics, config_cat)
+        elif category == 'document_shadow':
+            return self._score_document_shadow(metrics, config_cat)
         else:
             return Status.PASS
     
@@ -263,6 +266,34 @@ class QualityScorer:
         
         return Status.PASS
     
+    def _score_document_shadow(self, metrics: Dict[str, Any], config: Dict[str, Any]) -> Status:
+        """Score document shadow metrics"""
+        
+        # Get shadow intensity thresholds from config
+        warn_threshold = config.get('warn_shadow_intensity', 20)
+        fail_threshold = config.get('fail_shadow_intensity', 40)
+        
+        # Get shadow metrics
+        shadow_present = metrics.get('shadow_present', False)
+        shadow_intensity = metrics.get('shadow_intensity', 0)
+        confidence = metrics.get('confidence', 1.0)
+        
+        # If shadow detection has very low confidence, give benefit of doubt
+        if confidence < 0.3:
+            return Status.PASS
+        
+        # If no shadow detected, pass
+        if not shadow_present:
+            return Status.PASS
+        
+        # Score based on shadow intensity
+        if shadow_intensity >= fail_threshold:
+            return Status.FAIL
+        elif shadow_intensity >= warn_threshold:
+            return Status.WARN
+        else:
+            return Status.PASS
+    
     def _status_to_score(self, status: Status) -> float:
         """Convert status to numeric score"""
         
@@ -350,7 +381,8 @@ class QualityScorer:
             'noise': "Use lower ISO setting or better lighting",
             'resolution': "Scan/photograph at higher DPI/resolution",
             'completeness': "Ensure full document is captured with margins",
-            'foreign_objects': "Remove hands, clips, or other objects from frame"
+            'foreign_objects': "Remove hands, clips, or other objects from frame",
+            'document_shadow': "Ensure document is flat against scanning surface"
         }
         
         base_action = action_map.get(category, f"Review {category} settings")

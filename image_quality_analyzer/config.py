@@ -59,6 +59,16 @@ DEFAULT_CONFIG = {
         "min_margin_px": 8,
         "min_content_bbox_coverage": 0.90
     },
+    "document_shadow": {
+        "shadow_threshold": 25,
+        "analysis_band_width": 50,
+        "min_contour_area": 10000,
+        "gaussian_blur_kernel": 3,
+        "canny_low": 50,
+        "canny_high": 150,
+        "warn_shadow_intensity": 20,
+        "fail_shadow_intensity": 40
+    },
     "scoring": {
         "four_star_weight": 1.0,
         "three_star_weight": 1.0,
@@ -153,6 +163,19 @@ CONFIG_SCHEMA = {
             "properties": {
                 "min_margin_px": {"type": "number"},
                 "min_content_bbox_coverage": {"type": "number"}
+            }
+        },
+        "document_shadow": {
+            "type": "object",
+            "properties": {
+                "shadow_threshold": {"type": "number"},
+                "analysis_band_width": {"type": "number"},
+                "min_contour_area": {"type": "number"},
+                "gaussian_blur_kernel": {"type": "number"},
+                "canny_low": {"type": "number"},
+                "canny_high": {"type": "number"},
+                "warn_shadow_intensity": {"type": "number"},
+                "fail_shadow_intensity": {"type": "number"}
             }
         },
         "scoring": {
