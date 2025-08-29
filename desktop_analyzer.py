@@ -62,12 +62,12 @@ class QualityStandardsEditor:
         self.window.geometry(f"+{x}+{y}")
         
     def create_widgets(self):
-        """Create all widgets for the standards editor"""
+        """Create all widgets for the standards editor with scrolling capability"""
         
         # Main container with padding
         self.main_frame = ttk.Frame(self.window, padding="15")
         
-        # Header
+        # Header (fixed at top)
         self.header_frame = ttk.Frame(self.main_frame)
         self.title_label = ttk.Label(
             self.header_frame, 
@@ -80,19 +80,10 @@ class QualityStandardsEditor:
             font=("Segoe UI", 10)
         )
         
-        # Standards notebook
-        self.standards_notebook = ttk.Notebook(self.main_frame)
+        # Create scrollable area for the main content
+        self.create_scrollable_content()
         
-        # Create tabs for different metric categories
-        self.create_resolution_tab()
-        self.create_exposure_tab()
-        self.create_sharpness_tab()
-        self.create_geometry_tab()
-        self.create_completeness_tab()
-        self.create_scoring_tab()
-        self.create_sla_tab()  # Add SLA configuration tab
-        
-        # Button frame
+        # Button frame (fixed at bottom)
         self.button_frame = ttk.Frame(self.main_frame)
         self.save_button = ttk.Button(
             self.button_frame, 
@@ -115,6 +106,55 @@ class QualityStandardsEditor:
             text="👁️ Preview JSON", 
             command=self.preview_config
         )
+    
+    def create_scrollable_content(self):
+        """Create scrollable area for the standards tabs"""
+        
+        # Create canvas and scrollbar for scrolling
+        self.canvas_frame = ttk.Frame(self.main_frame)
+        
+        self.canvas = tk.Canvas(self.canvas_frame, highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+        
+        # Configure scrolling
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Standards notebook inside scrollable area
+        self.standards_notebook = ttk.Notebook(self.scrollable_frame)
+        
+        # Create tabs for different metric categories
+        self.create_resolution_tab()
+        self.create_exposure_tab()
+        self.create_sharpness_tab()
+        self.create_geometry_tab()
+        self.create_completeness_tab()
+        self.create_scoring_tab()
+        self.create_sla_tab()  # Add SLA configuration tab
+        
+        # Bind mouse wheel scrolling
+        self.bind_mousewheel()
+        
+    def bind_mousewheel(self):
+        """Bind mouse wheel scrolling to the canvas"""
+        def _on_mousewheel(event):
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        def _bind_to_mousewheel(event):
+            self.canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        def _unbind_from_mousewheel(event):
+            self.canvas.unbind_all("<MouseWheel>")
+        
+        # Bind/unbind mousewheel when entering/leaving the window
+        self.window.bind('<Enter>', _bind_to_mousewheel)
+        self.window.bind('<Leave>', _unbind_from_mousewheel)
         
     def create_resolution_tab(self):
         """Create resolution standards tab"""
@@ -405,23 +445,38 @@ class QualityStandardsEditor:
         self.update_scale_label(self.warn_threshold, self.warn_threshold_label, "%", 100)
         
     def setup_layout(self):
-        """Setup the layout of all widgets"""
+        """Setup the layout of all widgets with scrolling capability"""
         self.main_frame.pack(fill="both", expand=True)
         
-        # Header
-        self.header_frame.pack(fill="x", pady=(0, 20))
+        # Header (fixed at top)
+        self.header_frame.pack(fill="x", pady=(0, 15))
         self.title_label.pack(anchor="w")
         self.subtitle_label.pack(anchor="w")
         
-        # Standards notebook
-        self.standards_notebook.pack(fill="both", expand=True, pady=(0, 20))
+        # Scrollable content area (expands to fill space)
+        self.canvas_frame.pack(fill="both", expand=True, pady=(0, 15))
         
-        # Buttons
+        # Canvas and scrollbar layout
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # Standards notebook inside scrollable area (expands to full width)
+        self.standards_notebook.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Button frame (fixed at bottom)
         self.button_frame.pack(fill="x")
         self.save_button.pack(side="right", padx=(10, 0))
         self.cancel_button.pack(side="right", padx=(10, 0))
         self.reset_button.pack(side="right", padx=(10, 0))
         self.preview_button.pack(side="left")
+        
+        # Update canvas scroll region after everything is packed
+        self.window.after(100, self.update_scroll_region)
+    
+    def update_scroll_region(self):
+        """Update the scroll region to encompass all content"""
+        self.canvas.update_idletasks()
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         
     def load_config_values(self):
         """Load current config values into the interface"""
