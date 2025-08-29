@@ -1,0 +1,114 @@
+{
+  "resolution": {
+    "min_dpi_text": 300,
+    "min_dpi_archival": 400
+  },
+  "exposure": {
+    "max_shadow_clip_pct": 0.5,
+    "max_highlight_clip_pct": 0.5,
+    "target_bg_median_lum": 0.1,
+    "illumination_uniformity_warn": 0.15,
+    "illumination_uniformity_fail": 0.25
+  },
+  "contrast": {
+    "min_global_contrast": 0.2,
+    "warn_global_contrast": 0.15
+  },
+  "sharpness": {
+    "min_laplacian_variance": 150.0,
+    "warn_laplacian_variance": 120.0
+  },
+  "noise": {
+    "max_bg_noise_std": 0.04,
+    "warn_bg_noise_std": 0.06
+  },
+  "geometry": {
+    "max_skew_deg_pass": 1.0,
+    "max_skew_deg_warn": 3.0
+  },
+  "border_background": {
+    "require_black_background": true,
+    "max_side_margin_ratio_pass": 0.1,
+    "max_side_margin_ratio_warn": 0.12,
+    "max_bg_median_luminance": 0.1
+  },
+  "color": {
+    "enable_color_checks": true,
+    "max_gray_deltaE_pass": 5.0,
+    "max_gray_deltaE_warn": 8.0,
+    "max_hue_cast_degrees_warn": 6.0
+  },
+  "format_integrity": {
+    "allowed_formats": [
+      "tiff",
+      "png",
+      "jpeg"
+    ],
+    "jpeg_quality_warn": 0.85,
+    "bit_depth_min": 8
+  },
+  "completeness": {
+    "min_margin_px": 8,
+    "min_content_bbox_coverage": 0.9
+  },
+  "document_shadow": {
+    "shadow_threshold": 25,
+    "analysis_band_width": 50,
+    "min_contour_area": 10000,
+    "gaussian_blur_kernel": 3,
+    "canny_low": 50,
+    "canny_high": 150,
+    "warn_shadow_intensity": 20,
+    "fail_shadow_intensity": 40
+  },
+  "scoring": {
+    "four_star_weight": 1.0,
+    "three_star_weight": 1.0,
+    "two_star_weight": 1.0,
+    "pass_score_threshold": 0.8,
+    "warn_score_threshold": 0.65
+  },
+  "sla": {
+    "enabled": true,
+    "name": "Basic Document Quality SLA",
+    "description": "Relaxed quality requirements for general document scanning and processing",
+    "requirements": {
+      "min_overall_score": 0.6,
+      "max_fail_categories": 2,
+      "required_pass_categories": [
+        "completeness",
+        "sharpness",
+        "resolution",
+        "contrast",
+        "exposure"
+      ],
+      "performance_targets": {
+        "sharpness_min_laplacian": 100.0,
+        "contrast_min_global": 0.15,
+        "resolution_min_dpi": 150.0,
+        "noise_max_std": 0.06,
+        "geometry_max_skew": 2.0,
+        "exposure_max_highlight_clip": 1.0,
+        "exposure_max_shadow_clip": 1.0
+      }
+    },
+    "compliance_levels": {
+      "excellent": {
+        "min_score": 0.85,
+        "description": "Exceeds all SLA requirements - professional quality"
+      },
+      "compliant": {
+        "min_score": 0.6,
+        "description": "Meets all SLA requirements - ready for processing"
+      },
+      "warning": {
+        "min_score": 0.45,
+        "description": "Below SLA but usable - review recommended"
+      },
+      "non_compliant": {
+        "min_score": 0.0,
+        "description": "Does not meet SLA requirements - reject or reprocess"
+      }
+    }
+  }
+}
