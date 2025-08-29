@@ -1,0 +1,75 @@
+{
+  "sla": {
+    "enabled": true,
+    "name": "High-Quality Document Processing SLA",
+    "description": "Strict quality requirements for professional document processing and archival",
+    "requirements": {
+      "min_overall_score": 0.80,
+      "max_fail_categories": 0,
+      "required_pass_categories": [
+        "completeness",
+        "sharpness", 
+        "resolution",
+        "format_integrity"
+      ],
+      "performance_targets": {
+        "sharpness_min_laplacian": 200.0,
+        "contrast_min_global": 0.25,
+        "resolution_min_dpi": 300,
+        "noise_max_std": 0.03,
+        "geometry_max_skew": 0.5,
+        "exposure_max_highlight_clip": 0.1,
+        "exposure_max_shadow_clip": 0.1
+      }
+    },
+    "compliance_levels": {
+      "excellent": {
+        "min_score": 0.95,
+        "description": "Exceeds all SLA requirements - professional archival quality"
+      },
+      "compliant": {
+        "min_score": 0.80,
+        "description": "Meets all SLA requirements - ready for processing"
+      },
+      "warning": {
+        "min_score": 0.65,
+        "description": "Below SLA but marginally usable - review recommended"
+      },
+      "non_compliant": {
+        "min_score": 0.0,
+        "description": "Does not meet SLA requirements - reject or reprocess"
+      }
+    }
+  },
+  "resolution": {
+    "min_dpi_text": 300,
+    "min_dpi_archival": 400
+  },
+  "exposure": {
+    "max_shadow_clip_pct": 0.1,
+    "max_highlight_clip_pct": 0.1,
+    "target_bg_median_lum": 0.10,
+    "illumination_uniformity_warn": 0.10,
+    "illumination_uniformity_fail": 0.15
+  },
+  "contrast": {
+    "min_global_contrast": 0.25,
+    "warn_global_contrast": 0.20
+  },
+  "sharpness": {
+    "min_laplacian_variance": 200.0,
+    "warn_laplacian_variance": 150.0
+  },
+  "noise": {
+    "max_bg_noise_std": 0.03,
+    "warn_bg_noise_std": 0.04
+  },
+  "geometry": {
+    "max_skew_deg_pass": 0.5,
+    "max_skew_deg_warn": 1.0
+  },
+  "scoring": {
+    "pass_score_threshold": 0.85,
+    "warn_score_threshold": 0.70
+  }
+}

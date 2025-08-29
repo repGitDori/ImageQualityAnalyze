@@ -1,0 +1,271 @@
+{
+  "image_id": "dark_doc",
+  "file_path": "sample_images\\dark_doc.jpg",
+  "pixels": {
+    "w": 800,
+    "h": 600
+  },
+  "dpi": {
+    "x": 72,
+    "y": 72
+  },
+  "metrics": {
+    "completeness": {
+      "content_bbox_coverage": 0.0002625,
+      "edge_touch_flag": false,
+      "margins": {
+        "left_px": 78,
+        "right_px": 704,
+        "top_px": 52,
+        "bottom_px": 541
+      },
+      "edge_violations": {
+        "left_violation": false,
+        "right_violation": false,
+        "top_violation": false,
+        "bottom_violation": false
+      },
+      "document_bbox": {
+        "x_min": 78,
+        "y_min": 52,
+        "x_max": 96,
+        "y_max": 59,
+        "width": 18,
+        "height": 7,
+        "aspect_ratio": 2.5714285714285716
+      }
+    },
+    "foreign_objects": {
+      "foreign_object_flag": false,
+      "foreign_object_area_pct": 0.0
+    },
+    "sharpness": {},
+    "exposure": {
+      "clipping": {
+        "shadow_clip_pct": 0.0,
+        "highlight_clip_pct": 1.9230769230769231,
+        "shadow_clipped_pixels": 0,
+        "highlight_clipped_pixels": 2,
+        "total_pixels": 104
+      },
+      "illumination_uniformity": {
+        "uniformity_ratio": 1.0,
+        "local_std": 0.0,
+        "local_mean": 0.0,
+        "coefficient_of_variation": 0.0
+      },
+      "brightness": {
+        "mean": 0.5518099665641785,
+        "median": 0.6843137741088867,
+        "std": 0.3186931014060974,
+        "min": 0.10588235408067703,
+        "max": 1.0,
+        "percentiles": {
+          "p5": 0.13235294818878174,
+          "p10": 0.15137255489826204,
+          "p25": 0.2235294133424759,
+          "p75": 0.8450980484485626,
+          "p90": 0.9443137288093567,
+          "p95": 0.9668627470731734
+        }
+      },
+      "dynamic_range": {
+        "effective_range": 0.8345097899436951,
+        "full_range": 0.8941176533699036,
+        "utilization": 0.8345097899436951,
+        "p5_value": 0.13235294818878174,
+        "p95_value": 0.9668627381324768
+      },
+      "background": {
+        "median": 0.19607843458652496,
+        "mean": 0.197124645113945,
+        "std": 0.02590189501643181,
+        "max": 1.0,
+        "pixel_count": 479896
+      }
+    },
+    "contrast": {
+      "global_contrast": 0.8345097899436951,
+      "rms_contrast": 0.3186931014060974,
+      "percentiles": {
+        "p5": 0.13235294818878174,
+        "p95": 0.9668627381324768
+      },
+      "mean_luminance": 0.5518099665641785,
+      "local_contrast": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "color": {
+      "enabled": true,
+      "hue_cast_degrees": 0.0,
+      "gray_deltaE": null
+    },
+    "geometry": {
+      "skew_angle_deg": 0.0,
+      "skew_angle_abs": 0.0,
+      "line_angles": {
+        "detected_lines": 0,
+        "angle_std": 0.0,
+        "angle_range": 0.0
+      },
+      "warp_index": 0.0,
+      "orientation": {
+        "aspect_ratio": 2.5714285714285716,
+        "orientation": "landscape",
+        "doc_width_px": 18,
+        "doc_height_px": 7
+      }
+    },
+    "border_background": {
+      "bg_median_lum": 0.19607843458652496,
+      "bg_mean_lum": 0.197124645113945,
+      "bg_std": 0.02590189501643181,
+      "left_margin_ratio": 4.333333333333333,
+      "right_margin_ratio": 39.111111111111114,
+      "top_margin_ratio": 7.428571428571429,
+      "bottom_margin_ratio": 77.28571428571429,
+      "margins_px": {
+        "left": 78,
+        "right": 704,
+        "top": 52,
+        "bottom": 541
+      }
+    },
+    "noise": {
+      "bg_noise_std": 0.0,
+      "blockiness_index": 0.11561151186582433
+    },
+    "format_integrity": {
+      "format_name": "jpeg",
+      "format_allowed": true,
+      "bit_depth": 8,
+      "jpeg_quality": null,
+      "compression": null
+    },
+    "resolution": {
+      "effective_dpi_x": 72.0,
+      "effective_dpi_y": 72.0,
+      "pixel_width": 800,
+      "pixel_height": 600,
+      "megapixels": 0.48
+    },
+    "document_shadow": {
+      "shadow_present": false,
+      "shadow_intensity": 0.0,
+      "shadow_width": 0.0,
+      "shadow_coverage": 0.0,
+      "perimeter_analyzed": 0.0,
+      "confidence": 0.0,
+      "quality_score": 0.5,
+      "error": "Could not detect document edges",
+      "measurements": {
+        "edge_intensity_avg": 128.0,
+        "outer_intensity_avg": 128.0,
+        "avg_intensity_diff": 0.0,
+        "avg_shadow_width": 0.0,
+        "gradient_variance": 0.0,
+        "shadow_coverage_percent": 0.0,
+        "shadow_pixel_count": 0,
+        "total_analysis_pixels": 0,
+        "perimeter_length": 0.0,
+        "contour_area": 0.0,
+        "sample_count": 0
+      },
+      "processing_info": {
+        "error": "Could not detect document edges",
+        "analysis_band_width": 50,
+        "shadow_threshold": 25
+      }
+    }
+  },
+  "category_status": {
+    "completeness": "fail",
+    "sharpness": "fail",
+    "exposure": "fail",
+    "contrast": "pass",
+    "color": "pass",
+    "geometry": "pass",
+    "border_background": "fail",
+    "noise": "pass",
+    "format_integrity": "pass",
+    "resolution": "fail",
+    "document_shadow": "pass"
+  },
+  "global": {
+    "score": 0.5454545454545454,
+    "stars": 1,
+    "status": "fail",
+    "critical_fail": true,
+    "actions": [
+      "\u274c Ensure full document is captured with margins",
+      "\u274c Retake photo with better focus or use tripod",
+      "\u274c Adjust lighting or camera exposure settings",
+      "\u274c Ensure black background and proper margins",
+      "\u274c Scan/photograph at higher DPI/resolution"
+    ]
+  },
+  "sla": {
+    "enabled": true,
+    "sla_name": "Default Document Quality SLA",
+    "sla_description": "Standard quality requirements for document processing",
+    "compliance": {
+      "level": "non_compliant",
+      "description": "Does not meet SLA requirements",
+      "overall_compliant": false,
+      "score": 0.5454545454545454,
+      "requirements_met": {
+        "minimum_score": {
+          "required": 0.75,
+          "actual": 0.5454545454545454,
+          "compliant": false
+        },
+        "category_failures": {
+          "max_allowed": 1,
+          "actual": 5,
+          "compliant": false
+        },
+        "required_categories": {
+          "required": [
+            "completeness",
+            "sharpness",
+            "resolution"
+          ],
+          "violations": [
+            "completeness",
+            "sharpness",
+            "resolution"
+          ],
+          "compliant": false
+        },
+        "performance_targets": {
+          "violations": [
+            {
+              "metric": "Sharpness (Laplacian Variance)",
+              "required": 150.0,
+              "actual": 0,
+              "description": "Image sharpness below SLA requirement (0.0 < 150.0)"
+            },
+            {
+              "metric": "Resolution (DPI)",
+              "required": 300,
+              "actual": 72.0,
+              "description": "Image resolution below SLA requirement (72.0 DPI < 300 DPI)"
+            }
+          ],
+          "compliant": false
+        }
+      }
+    },
+    "recommendations": [
+      "\ud83c\udfaf SLA REQUIREMENT: Achieve minimum overall score of 75.0% for SLA compliance",
+      "\ud83c\udfaf SLA REQUIREMENT: Reduce failing categories to 1 or fewer for SLA compliance",
+      "\ud83c\udfaf SLA REQUIREMENT: These critical categories must pass: completeness, sharpness, resolution",
+      "\ud83c\udfaf SLA TARGET: Image sharpness below SLA requirement (0.0 < 150.0)",
+      "\ud83c\udfaf SLA TARGET: Image resolution below SLA requirement (72.0 DPI < 300 DPI)"
+    ]
+  }
+}

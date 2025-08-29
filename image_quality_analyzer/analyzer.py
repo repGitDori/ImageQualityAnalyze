@@ -103,7 +103,8 @@ class ImageQualityAnalyzer:
             },
             'metrics': metrics,
             'category_status': scoring_result['category_status'],
-            'global': scoring_result['global']
+            'global': scoring_result['global'],
+            'sla': scoring_result.get('sla', {'enabled': False})
         }
         
         return report
@@ -190,6 +191,7 @@ class ImageQualityAnalyzer:
             metrics = result.get('metrics', {})
             
             # Extract key metrics for CSV as per spec schema
+            sla_info = result.get('sla', {})
             row = {
                 'image_id': result.get('image_id', ''),
                 'file_path': result.get('file_path', ''),
@@ -213,7 +215,14 @@ class ImageQualityAnalyzer:
                 'bit_depth': metrics.get('format_integrity', {}).get('bit_depth', 0),
                 'score': result.get('global', {}).get('score', 0),
                 'stars': result.get('global', {}).get('stars', 0),
-                'status': result.get('global', {}).get('status', '')
+                'status': result.get('global', {}).get('status', ''),
+                # SLA columns
+                'sla_enabled': sla_info.get('enabled', False),
+                'sla_compliance_level': sla_info.get('compliance', {}).get('level', 'unknown'),
+                'sla_overall_compliant': sla_info.get('compliance', {}).get('overall_compliant', False),
+                'sla_score_compliant': sla_info.get('compliance', {}).get('requirements_met', {}).get('minimum_score', {}).get('compliant', False),
+                'sla_category_compliant': sla_info.get('compliance', {}).get('requirements_met', {}).get('category_failures', {}).get('compliant', False),
+                'sla_performance_compliant': sla_info.get('compliance', {}).get('requirements_met', {}).get('performance_targets', {}).get('compliant', False)
             }
             
             rows.append(row)

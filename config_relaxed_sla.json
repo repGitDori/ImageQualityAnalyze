@@ -1,0 +1,64 @@
+{
+  "sla": {
+    "enabled": true,
+    "name": "Basic Document Quality SLA",
+    "description": "Relaxed quality requirements for general document scanning and processing",
+    "requirements": {
+      "min_overall_score": 0.60,
+      "max_fail_categories": 2,
+      "required_pass_categories": [
+        "completeness",
+        "sharpness"
+      ],
+      "performance_targets": {
+        "sharpness_min_laplacian": 100.0,
+        "contrast_min_global": 0.15,
+        "resolution_min_dpi": 150,
+        "noise_max_std": 0.06,
+        "geometry_max_skew": 2.0,
+        "exposure_max_highlight_clip": 1.0,
+        "exposure_max_shadow_clip": 1.0
+      }
+    },
+    "compliance_levels": {
+      "excellent": {
+        "min_score": 0.85,
+        "description": "Exceeds all SLA requirements - excellent quality"
+      },
+      "compliant": {
+        "min_score": 0.60,
+        "description": "Meets all SLA requirements - acceptable quality"
+      },
+      "warning": {
+        "min_score": 0.45,
+        "description": "Below SLA but usable - minor improvements recommended"
+      },
+      "non_compliant": {
+        "min_score": 0.0,
+        "description": "Does not meet SLA requirements - significant issues"
+      }
+    }
+  },
+  "resolution": {
+    "min_dpi_text": 150,
+    "min_dpi_archival": 200
+  },
+  "exposure": {
+    "max_shadow_clip_pct": 1.0,
+    "max_highlight_clip_pct": 1.0,
+    "illumination_uniformity_warn": 0.20,
+    "illumination_uniformity_fail": 0.30
+  },
+  "contrast": {
+    "min_global_contrast": 0.15,
+    "warn_global_contrast": 0.10
+  },
+  "sharpness": {
+    "min_laplacian_variance": 100.0,
+    "warn_laplacian_variance": 80.0
+  },
+  "scoring": {
+    "pass_score_threshold": 0.70,
+    "warn_score_threshold": 0.50
+  }
+}

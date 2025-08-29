@@ -90,6 +90,7 @@ class QualityStandardsEditor:
         self.create_geometry_tab()
         self.create_completeness_tab()
         self.create_scoring_tab()
+        self.create_sla_tab()  # Add SLA configuration tab
         
         # Button frame
         self.button_frame = ttk.Frame(self.main_frame)
@@ -456,6 +457,50 @@ class QualityStandardsEditor:
             self.pass_threshold.set(self.config.get('scoring', {}).get('pass_score_threshold', 0.8))
             self.warn_threshold.set(self.config.get('scoring', {}).get('warn_score_threshold', 0.65))
             
+            # SLA Configuration (if SLA tab exists)
+            if hasattr(self, 'sla_enabled'):
+                sla_config = self.config.get('sla', {})
+                self.sla_enabled.set(sla_config.get('enabled', False))
+                
+                self.sla_name.delete(0, tk.END)
+                self.sla_name.insert(0, sla_config.get('name', 'Default Document Quality SLA'))
+                
+                self.sla_description.delete(1.0, tk.END)
+                self.sla_description.insert(1.0, sla_config.get('description', 'Standard quality requirements for document processing'))
+                
+                requirements = sla_config.get('requirements', {})
+                self.sla_min_score.set(requirements.get('min_overall_score', 0.80))
+                
+                self.sla_max_fails.delete(0, tk.END)
+                self.sla_max_fails.insert(0, str(requirements.get('max_fail_categories', 1)))
+                
+                # Required categories
+                required_cats = requirements.get('required_pass_categories', [])
+                for cat, var in self.sla_req_categories.items():
+                    var.set(cat in required_cats)
+                
+                # Performance targets
+                targets = requirements.get('performance_targets', {})
+                for key, entry in self.sla_targets.items():
+                    if key in targets:
+                        entry.delete(0, tk.END)
+                        entry.insert(0, str(targets[key]))
+                
+                # Compliance levels
+                compliance_levels = sla_config.get('compliance_levels', {})
+                
+                excellent = compliance_levels.get('excellent', {}).get('min_score', 0.95)
+                self.sla_excellent_score.delete(0, tk.END)
+                self.sla_excellent_score.insert(0, str(excellent))
+                
+                compliant = compliance_levels.get('compliant', {}).get('min_score', 0.80)
+                self.sla_compliant_score.delete(0, tk.END)
+                self.sla_compliant_score.insert(0, str(compliant))
+                
+                warning = compliance_levels.get('warning', {}).get('min_score', 0.65)
+                self.sla_warning_score.delete(0, tk.END)
+                self.sla_warning_score.insert(0, str(warning))
+            
             # Update all labels
             self.update_all_labels()
             
@@ -528,6 +573,51 @@ class QualityStandardsEditor:
                 'warn_score_threshold': self.warn_threshold.get()
             })
             
+            # SLA Configuration (if SLA tab exists)
+            if hasattr(self, 'sla_enabled'):
+                # Get required categories
+                required_categories = [cat for cat, var in self.sla_req_categories.items() if var.get()]
+                
+                # Get performance targets
+                performance_targets = {}
+                for key, entry in self.sla_targets.items():
+                    try:
+                        value = float(entry.get())
+                        performance_targets[key] = value
+                    except ValueError:
+                        pass  # Skip invalid values
+                
+                # Build SLA config
+                config['sla'] = {
+                    'enabled': self.sla_enabled.get(),
+                    'name': self.sla_name.get(),
+                    'description': self.sla_description.get(1.0, tk.END).strip(),
+                    'requirements': {
+                        'min_overall_score': self.sla_min_score.get(),
+                        'max_fail_categories': int(self.sla_max_fails.get() or 1),
+                        'required_pass_categories': required_categories,
+                        'performance_targets': performance_targets
+                    },
+                    'compliance_levels': {
+                        'excellent': {
+                            'min_score': float(self.sla_excellent_score.get() or 0.95),
+                            'description': 'Exceeds all SLA requirements - professional quality'
+                        },
+                        'compliant': {
+                            'min_score': float(self.sla_compliant_score.get() or 0.80),
+                            'description': 'Meets all SLA requirements - ready for processing'
+                        },
+                        'warning': {
+                            'min_score': float(self.sla_warning_score.get() or 0.65),
+                            'description': 'Below SLA but usable - review recommended'
+                        },
+                        'non_compliant': {
+                            'min_score': 0.0,
+                            'description': 'Does not meet SLA requirements - reject or reprocess'
+                        }
+                    }
+                }
+            
             return config
             
         except Exception as e:
@@ -542,6 +632,225 @@ class QualityStandardsEditor:
         except Exception as e:
             messagebox.showerror("Error", f"Error saving standards: {e}")
             
+    def create_sla_tab(self):
+        """Create SLA configuration tab"""
+        frame = ttk.Frame(self.standards_notebook, padding="20")
+        self.standards_notebook.add(frame, text="🎯 SLA Settings")
+        
+        # SLA Enable/Disable
+        sla_enable_frame = ttk.LabelFrame(frame, text="SLA Configuration", padding="15")
+        sla_enable_frame.pack(fill="x", pady=(0, 20))
+        
+        self.sla_enabled = tk.BooleanVar()
+        sla_check = ttk.Checkbutton(sla_enable_frame, text="Enable SLA Compliance Checking", variable=self.sla_enabled)
+        sla_check.pack(anchor="w", pady=5)
+        
+        # SLA Basic Info
+        info_frame = ttk.Frame(sla_enable_frame)
+        info_frame.pack(fill="x", pady=10)
+        
+        ttk.Label(info_frame, text="SLA Name:").grid(row=0, column=0, sticky="w", padx=(0, 10))
+        self.sla_name = ttk.Entry(info_frame, width=40)
+        self.sla_name.grid(row=0, column=1, sticky="w")
+        
+        ttk.Label(info_frame, text="Description:").grid(row=1, column=0, sticky="nw", padx=(0, 10), pady=(10, 0))
+        self.sla_description = tk.Text(info_frame, height=3, width=40)
+        self.sla_description.grid(row=1, column=1, sticky="w", pady=(10, 0))
+        
+        # SLA Requirements Frame
+        req_frame = ttk.LabelFrame(frame, text="SLA Requirements", padding="15")
+        req_frame.pack(fill="x", pady=(0, 20))
+        
+        # Minimum overall score
+        ttk.Label(req_frame, text="Minimum Overall Score:").grid(row=0, column=0, sticky="w", pady=5)
+        self.sla_min_score = ttk.Scale(req_frame, from_=0.5, to=1.0, orient="horizontal", length=200)
+        self.sla_min_score.grid(row=0, column=1, sticky="w", padx=(10, 0))
+        self.sla_min_score_label = ttk.Label(req_frame, text="80%")
+        self.sla_min_score_label.grid(row=0, column=2, sticky="w", padx=(10, 0))
+        
+        # Maximum fail categories
+        ttk.Label(req_frame, text="Max Failed Categories:").grid(row=1, column=0, sticky="w", pady=5)
+        self.sla_max_fails = ttk.Spinbox(req_frame, from_=0, to=10, width=10)
+        self.sla_max_fails.grid(row=1, column=1, sticky="w", padx=(10, 0))
+        
+        # Required pass categories
+        ttk.Label(req_frame, text="Required PASS Categories:").grid(row=2, column=0, sticky="nw", pady=(10, 0))
+        req_cat_frame = ttk.Frame(req_frame)
+        req_cat_frame.grid(row=2, column=1, sticky="w", padx=(10, 0), pady=(10, 0))
+        
+        self.sla_req_categories = {}
+        categories = ['completeness', 'sharpness', 'resolution', 'format_integrity', 'contrast', 'exposure']
+        for i, cat in enumerate(categories):
+            var = tk.BooleanVar()
+            cb = ttk.Checkbutton(req_cat_frame, text=cat.replace('_', ' ').title(), variable=var)
+            cb.grid(row=i//2, column=i%2, sticky="w", padx=(0, 20))
+            self.sla_req_categories[cat] = var
+        
+        # Performance Targets Frame
+        perf_frame = ttk.LabelFrame(frame, text="Performance Targets", padding="15")
+        perf_frame.pack(fill="x", pady=(0, 20))
+        
+        # Create entry fields for performance targets
+        targets = [
+            ('Sharpness Min (Laplacian):', 'sharpness_min_laplacian', 150.0),
+            ('Contrast Min (Global):', 'contrast_min_global', 0.20),
+            ('Resolution Min (DPI):', 'resolution_min_dpi', 300),
+            ('Noise Max (Std Dev):', 'noise_max_std', 0.05),
+            ('Geometry Max Skew:', 'geometry_max_skew', 1.0),
+            ('Max Highlight Clip:', 'exposure_max_highlight_clip', 0.50),
+            ('Max Shadow Clip:', 'exposure_max_shadow_clip', 0.50)
+        ]
+        
+        self.sla_targets = {}
+        for i, (label, key, default) in enumerate(targets):
+            ttk.Label(perf_frame, text=label).grid(row=i, column=0, sticky="w", pady=2)
+            entry = ttk.Entry(perf_frame, width=15)
+            entry.grid(row=i, column=1, sticky="w", padx=(10, 0), pady=2)
+            entry.insert(0, str(default))
+            self.sla_targets[key] = entry
+        
+        # Compliance Levels Frame
+        comp_frame = ttk.LabelFrame(frame, text="Compliance Levels", padding="15")
+        comp_frame.pack(fill="x", pady=(0, 20))
+        
+        # Excellent level
+        ttk.Label(comp_frame, text="Excellent (Min Score):").grid(row=0, column=0, sticky="w", pady=2)
+        self.sla_excellent_score = ttk.Entry(comp_frame, width=10)
+        self.sla_excellent_score.grid(row=0, column=1, sticky="w", padx=(10, 0), pady=2)
+        self.sla_excellent_score.insert(0, "0.95")
+        
+        # Compliant level  
+        ttk.Label(comp_frame, text="Compliant (Min Score):").grid(row=1, column=0, sticky="w", pady=2)
+        self.sla_compliant_score = ttk.Entry(comp_frame, width=10)
+        self.sla_compliant_score.grid(row=1, column=1, sticky="w", padx=(10, 0), pady=2)
+        self.sla_compliant_score.insert(0, "0.80")
+        
+        # Warning level
+        ttk.Label(comp_frame, text="Warning (Min Score):").grid(row=2, column=0, sticky="w", pady=2)
+        self.sla_warning_score = ttk.Entry(comp_frame, width=10)
+        self.sla_warning_score.grid(row=2, column=1, sticky="w", padx=(10, 0), pady=2)
+        self.sla_warning_score.insert(0, "0.65")
+        
+        # Bind scale updates
+        self.sla_min_score.bind("<Motion>", lambda e: self.update_scale_label(self.sla_min_score, self.sla_min_score_label, "%", 100))
+        
+        # SLA Presets
+        preset_sla_frame = ttk.LabelFrame(frame, text="SLA Presets", padding="15")
+        preset_sla_frame.pack(fill="x")
+        
+        ttk.Button(preset_sla_frame, text="🏢 Strict SLA", command=lambda: self.apply_sla_preset("strict")).pack(side="left", padx=(0, 10))
+        ttk.Button(preset_sla_frame, text="📚 Balanced SLA", command=lambda: self.apply_sla_preset("balanced")).pack(side="left", padx=(0, 10))
+        ttk.Button(preset_sla_frame, text="🔄 Relaxed SLA", command=lambda: self.apply_sla_preset("relaxed")).pack(side="left")
+        
+    def apply_sla_preset(self, preset_type):
+        """Apply SLA preset configurations"""
+        presets = {
+            "strict": {
+                "enabled": True,
+                "name": "High-Quality Document Processing SLA",
+                "description": "Strict quality requirements for professional document processing and archival",
+                "min_overall_score": 0.80,
+                "max_fail_categories": 0,
+                "required_categories": ['completeness', 'sharpness', 'resolution', 'format_integrity'],
+                "targets": {
+                    "sharpness_min_laplacian": 200.0,
+                    "contrast_min_global": 0.25,
+                    "resolution_min_dpi": 300,
+                    "noise_max_std": 0.03,
+                    "geometry_max_skew": 0.5,
+                    "exposure_max_highlight_clip": 0.1,
+                    "exposure_max_shadow_clip": 0.1
+                },
+                "levels": {
+                    "excellent": 0.95,
+                    "compliant": 0.80,
+                    "warning": 0.65
+                }
+            },
+            "balanced": {
+                "enabled": True,
+                "name": "Standard Document Quality SLA",
+                "description": "Balanced quality requirements for general document processing",
+                "min_overall_score": 0.70,
+                "max_fail_categories": 1,
+                "required_categories": ['completeness', 'sharpness'],
+                "targets": {
+                    "sharpness_min_laplacian": 150.0,
+                    "contrast_min_global": 0.20,
+                    "resolution_min_dpi": 200,
+                    "noise_max_std": 0.05,
+                    "geometry_max_skew": 1.0,
+                    "exposure_max_highlight_clip": 0.50,
+                    "exposure_max_shadow_clip": 0.50
+                },
+                "levels": {
+                    "excellent": 0.90,
+                    "compliant": 0.70,
+                    "warning": 0.55
+                }
+            },
+            "relaxed": {
+                "enabled": True,
+                "name": "Basic Document Quality SLA", 
+                "description": "Relaxed quality requirements for general document scanning and processing",
+                "min_overall_score": 0.60,
+                "max_fail_categories": 2,
+                "required_categories": ['completeness', 'sharpness'],
+                "targets": {
+                    "sharpness_min_laplacian": 100.0,
+                    "contrast_min_global": 0.15,
+                    "resolution_min_dpi": 150,
+                    "noise_max_std": 0.06,
+                    "geometry_max_skew": 2.0,
+                    "exposure_max_highlight_clip": 1.0,
+                    "exposure_max_shadow_clip": 1.0
+                },
+                "levels": {
+                    "excellent": 0.85,
+                    "compliant": 0.60,
+                    "warning": 0.45
+                }
+            }
+        }
+        
+        if preset_type in presets:
+            preset = presets[preset_type]
+            
+            # Apply basic settings
+            self.sla_enabled.set(preset["enabled"])
+            self.sla_name.delete(0, tk.END)
+            self.sla_name.insert(0, preset["name"])
+            self.sla_description.delete(1.0, tk.END)
+            self.sla_description.insert(1.0, preset["description"])
+            
+            # Apply requirements
+            self.sla_min_score.set(preset["min_overall_score"])
+            self.sla_max_fails.delete(0, tk.END)
+            self.sla_max_fails.insert(0, str(preset["max_fail_categories"]))
+            
+            # Apply required categories
+            for cat, var in self.sla_req_categories.items():
+                var.set(cat in preset["required_categories"])
+            
+            # Apply performance targets
+            for key, value in preset["targets"].items():
+                if key in self.sla_targets:
+                    self.sla_targets[key].delete(0, tk.END)
+                    self.sla_targets[key].insert(0, str(value))
+            
+            # Apply compliance levels
+            self.sla_excellent_score.delete(0, tk.END)
+            self.sla_excellent_score.insert(0, str(preset["levels"]["excellent"]))
+            self.sla_compliant_score.delete(0, tk.END)
+            self.sla_compliant_score.insert(0, str(preset["levels"]["compliant"]))
+            self.sla_warning_score.delete(0, tk.END)
+            self.sla_warning_score.insert(0, str(preset["levels"]["warning"]))
+            
+            # Update labels
+            self.update_scale_label(self.sla_min_score, self.sla_min_score_label, "%", 100)
+            
+            messagebox.showinfo("SLA Preset Applied", f"Applied {preset_type.title()} SLA configuration.")
+    
     def reset_to_defaults(self):
         """Reset all values to defaults"""
         if messagebox.askyesno("Reset to Defaults", "This will reset all values to their defaults. Continue?"):
@@ -1194,22 +1503,27 @@ class ProfessionalDesktopImageQualityAnalyzer:
                     self.create_batch_success_sheet(writer, workbook, successful_results, 
                                                   title_format, header_format, success_format, warning_format, fail_format)
                 
-                # 3. DETAILED METRICS SHEET - Raw numerical data
+                # 4. DETAILED METRICS SHEET - Raw numerical data
                 if successful_results:
                     self.create_detailed_metrics_sheet(writer, workbook, successful_results, 
                                                      title_format, header_format, success_format, warning_format, fail_format)
                 
-                # 4. RAW MEASUREMENTS SHEET - All raw values
+                # 5. SLA COMPLIANCE SHEET - Service Level Agreement comparison
+                if successful_results:
+                    self.create_sla_compliance_sheet(writer, workbook, successful_results,
+                                                    title_format, header_format, success_format, warning_format, fail_format)
+                
+                # 6. RAW MEASUREMENTS SHEET - All raw values
                 if successful_results:
                     self.create_raw_measurements_sheet(writer, workbook, successful_results, 
                                                      title_format, header_format)
                 
-                # 5. TECHNICAL ANALYSIS SHEET - Advanced metrics
+                # 7. TECHNICAL ANALYSIS SHEET - Advanced metrics
                 if successful_results:
                     self.create_technical_analysis_sheet(writer, workbook, successful_results, 
                                                         title_format, header_format)
                 
-                # 6. QUALITY BREAKDOWN SHEET - Category deep dive
+                # 8. QUALITY BREAKDOWN SHEET - Category deep dive
                 if successful_results:
                     self.create_quality_breakdown_sheet(writer, workbook, successful_results, 
                                                        title_format, header_format, success_format, warning_format, fail_format)
@@ -1259,8 +1573,8 @@ class ProfessionalDesktopImageQualityAnalyzer:
         # Create DataFrame
         failed_df = pd.DataFrame(failed_data)
         
-        # Write to Excel
-        failed_df.to_excel(writer, sheet_name='Failed Files', index=False, startrow=2)
+        # Write to Excel (data starts at row 3, pandas startrow=2)
+        failed_df.to_excel(writer, sheet_name='Failed Files', index=False, startrow=2, header=False)
         
         # Get worksheet
         worksheet = writer.sheets['Failed Files']
@@ -1268,9 +1582,10 @@ class ProfessionalDesktopImageQualityAnalyzer:
         # Add title
         worksheet.merge_range('A1:F1', '❌ FAILED FILES - DETAILED ERROR REPORT', title_format)
         
-        # Add proper headers with formatting
-        for col_num, column_title in enumerate(failed_df.columns):
-            worksheet.write(1, col_num, column_title, header_format)
+        # Write column headers manually at row 2 (Excel row 2, index 1)
+        headers = ['File Name', 'Analysis Type', 'Error Type', 'Error Reason', 'Full Path', 'Timestamp']
+        for col_num, header in enumerate(headers):
+            worksheet.write(1, col_num, header, header_format)
         
         # Set column widths
         worksheet.set_column('A:A', 25)  # File Name
@@ -1280,10 +1595,15 @@ class ProfessionalDesktopImageQualityAnalyzer:
         worksheet.set_column('E:E', 50)  # Full Path
         worksheet.set_column('F:F', 20)  # Timestamp
         
-        # Apply formatting to all data rows
-        for row in range(2, len(failed_data) + 2):
-            for col in range(6):
-                worksheet.write(row, col, failed_df.iloc[row-2, col], fail_format)
+        # Apply formatting to all data rows (data starts at row 3, Excel 1-based)
+        for row_idx, row_data in enumerate(failed_data):
+            excel_row = row_idx + 2  # Row 3, 4, 5, etc. (0-based indexing: 2, 3, 4, etc.)
+            worksheet.write(excel_row, 0, row_data['File Name'], fail_format)
+            worksheet.write(excel_row, 1, row_data['Analysis Type'], fail_format)
+            worksheet.write(excel_row, 2, row_data['Error Type'], fail_format)
+            worksheet.write(excel_row, 3, row_data['Error Reason'], fail_format)
+            worksheet.write(excel_row, 4, row_data['Full Path'], fail_format)
+            worksheet.write(excel_row, 5, row_data['Timestamp'], fail_format)
         
         print(f"📊 Created Failed Files sheet with {len(failed_data)} entries")
     
@@ -1315,26 +1635,36 @@ class ProfessionalDesktopImageQualityAnalyzer:
         }
         
         summary_df = pd.DataFrame(summary_data)
-        summary_df.to_excel(writer, sheet_name='Batch Summary', index=False, startrow=2)
+        # Write data starting at row 3 (Excel row 3, pandas startrow=2)
+        summary_df.to_excel(writer, sheet_name='Batch Summary', index=False, startrow=2, header=False)
         
         worksheet = writer.sheets['Batch Summary']
         worksheet.merge_range('A1:B1', '📊 BATCH ANALYSIS SUMMARY', title_format)
         
-        # Add proper headers with formatting
-        for col_num, column_title in enumerate(summary_df.columns):
-            worksheet.write(1, col_num, column_title, header_format)
+        # Write column headers manually at row 2 (Excel row 2, index 1)
+        headers = ['Metric', 'Value']
+        for col_num, header in enumerate(headers):
+            worksheet.write(1, col_num, header, header_format)
         
         # Set column widths
         worksheet.set_column('A:A', 25)
         worksheet.set_column('B:B', 20)
         
-        # Apply conditional formatting
-        for row in range(2, len(summary_data['Metric']) + 2):
-            metric = summary_df.iloc[row-2, 0]
+        # Apply conditional formatting (data starts at row 3, Excel 1-based)
+        for row_idx, metric in enumerate(summary_data['Metric']):
+            excel_row = row_idx + 2  # Row 3, 4, 5, etc. (0-based indexing: 2, 3, 4, etc.)
+            value = summary_data['Value'][row_idx]
+            
+            # Write the data first
+            worksheet.write(excel_row, 0, metric)
+            
+            # Apply conditional formatting to the value column
             if 'Success' in metric:
-                worksheet.write(row, 1, summary_df.iloc[row-2, 1], success_format)
+                worksheet.write(excel_row, 1, value, success_format)
             elif 'Failed' in metric:
-                worksheet.write(row, 1, summary_df.iloc[row-2, 1], fail_format)
+                worksheet.write(excel_row, 1, value, fail_format)
+            else:
+                worksheet.write(excel_row, 1, value)  # Default formatting
     
     def create_batch_success_sheet(self, writer, workbook, successful_results, title_format, 
                                   header_format, success_format, warning_format, fail_format):
@@ -1358,14 +1688,16 @@ class ProfessionalDesktopImageQualityAnalyzer:
             })
         
         success_df = pd.DataFrame(success_data)
-        success_df.to_excel(writer, sheet_name='Successful Analysis', index=False, startrow=2)
+        # Write data starting at row 3 (Excel row 3, pandas startrow=2)
+        success_df.to_excel(writer, sheet_name='Successful Analysis', index=False, startrow=2, header=False)
         
         worksheet = writer.sheets['Successful Analysis']
         worksheet.merge_range('A1:F1', '✅ SUCCESSFUL ANALYSIS RESULTS', title_format)
         
-        # Add proper headers with formatting
-        for col_num, column_title in enumerate(success_df.columns):
-            worksheet.write(1, col_num, column_title, header_format)
+        # Write column headers manually at row 2 (Excel row 2, index 1)
+        headers = ['File Name', 'Overall Score', 'Status', 'Stars', 'Critical Issues', 'Recommendations']
+        for col_num, header in enumerate(headers):
+            worksheet.write(1, col_num, header, header_format)
         
         # Set column widths
         worksheet.set_column('A:A', 25)  # File Name
@@ -1375,10 +1707,11 @@ class ProfessionalDesktopImageQualityAnalyzer:
         worksheet.set_column('E:E', 15)  # Critical Issues
         worksheet.set_column('F:F', 15)  # Recommendations
         
-        # Apply conditional formatting based on status
-        for row in range(3, len(success_data) + 3):  # Start from row 3 now
-            status = success_df.iloc[row-3]['Status']
-            critical = success_df.iloc[row-3]['Critical Issues']
+        # Apply conditional formatting based on status (data starts at row 3, Excel 1-based)
+        for row_idx, row_data in enumerate(success_data):
+            excel_row = row_idx + 2  # Row 3, 4, 5, etc. (0-based indexing: 2, 3, 4, etc.)
+            status = row_data['Status']
+            critical = row_data['Critical Issues']
             
             if status == 'EXCELLENT':
                 format_to_use = success_format
@@ -1387,8 +1720,13 @@ class ProfessionalDesktopImageQualityAnalyzer:
             else:
                 format_to_use = warning_format
             
-            for col in range(6):
-                worksheet.write(row-1, col, success_df.iloc[row-3, col], format_to_use)
+            # Write the entire row with formatting
+            worksheet.write(excel_row, 0, row_data['File Name'], format_to_use)
+            worksheet.write(excel_row, 1, row_data['Overall Score'], format_to_use)
+            worksheet.write(excel_row, 2, row_data['Status'], format_to_use)
+            worksheet.write(excel_row, 3, row_data['Stars'], format_to_use)
+            worksheet.write(excel_row, 4, row_data['Critical Issues'], format_to_use)
+            worksheet.write(excel_row, 5, row_data['Recommendations'], format_to_use)
     
     def create_batch_statistics_sheet(self, writer, workbook, successful_results, failed_results,
                                      title_format, header_format, success_format, fail_format):
@@ -1418,14 +1756,16 @@ class ProfessionalDesktopImageQualityAnalyzer:
                 })
             
             error_df = pd.DataFrame(error_stats_data)
-            error_df.to_excel(writer, sheet_name='Statistics', index=False, startrow=2)
+            # Write data starting at row 3 (Excel row 3, pandas startrow=2)
+            error_df.to_excel(writer, sheet_name='Statistics', index=False, startrow=2, header=False)
             
             worksheet = writer.sheets['Statistics']
             worksheet.merge_range('A1:C1', '📈 ERROR STATISTICS', title_format)
             
-            # Add proper headers with formatting
-            for col_num, column_title in enumerate(error_df.columns):
-                worksheet.write(1, col_num, column_title, header_format)
+            # Write column headers manually at row 2 (Excel row 2, index 1)
+            headers = ['Error Type', 'Count', 'Percentage']
+            for col_num, header in enumerate(headers):
+                worksheet.write(1, col_num, header, header_format)
             
             # Analysis type breakdown
             if len(analysis_types) > 1:
@@ -1440,9 +1780,15 @@ class ProfessionalDesktopImageQualityAnalyzer:
                 
                 analysis_df = pd.DataFrame(analysis_stats_data)
                 start_row = len(error_stats_data) + 4
-                analysis_df.to_excel(writer, sheet_name='Statistics', index=False, startrow=start_row)
+                # Write data starting at calculated row (no header since we'll write manually)
+                analysis_df.to_excel(writer, sheet_name='Statistics', index=False, startrow=start_row, header=False)
                 
                 worksheet.merge_range(f'A{start_row}:C{start_row}', '🔍 ANALYSIS TYPE BREAKDOWN', title_format)
+                
+                # Write analysis headers manually at start_row + 1
+                analysis_headers = ['Analysis Type', 'Failure Count', 'Failure Rate']
+                for col_num, header in enumerate(analysis_headers):
+                    worksheet.write(start_row, col_num, header, header_format)
         
         print(f"📊 Created Statistics sheet with error analysis")
     
@@ -1545,7 +1891,8 @@ class ProfessionalDesktopImageQualityAnalyzer:
         
         # Create DataFrame and write to Excel
         detailed_df = pd.DataFrame(detailed_data)
-        detailed_df.to_excel(writer, sheet_name='Detailed Metrics', index=False, startrow=2)
+        # Write data starting at row 3 (Excel row 3, pandas startrow=2)
+        detailed_df.to_excel(writer, sheet_name='Detailed Metrics', index=False, startrow=2, header=False)
         
         worksheet = writer.sheets['Detailed Metrics']
         
@@ -1558,14 +1905,15 @@ class ProfessionalDesktopImageQualityAnalyzer:
             end_col_letter = chr(65 + end_col_index)
             worksheet.merge_range(f'A1:{end_col_letter}1', '📊 DETAILED METRICS & MEASUREMENTS', title_format)
         
-        # Add proper headers with formatting
+        # Write column headers manually at row 2 (Excel row 2, index 1)
         for col_num, column_title in enumerate(detailed_df.columns):
             worksheet.write(1, col_num, column_title, header_format)
         
-        # Apply conditional formatting based on status columns
-        for idx, row in enumerate(detailed_data, start=3):  # Start from row 3 now
-            overall_status = row['Status']
-            critical = row['Critical Issues']
+        # Apply conditional formatting based on status columns (data starts at row 3, Excel 1-based)
+        for row_idx, row_data in enumerate(detailed_data):
+            excel_row = row_idx + 2  # Row 3, 4, 5, etc. (0-based indexing: 2, 3, 4, etc.)
+            overall_status = row_data['Status']
+            critical = row_data['Critical Issues']
             
             if overall_status == 'EXCELLENT':
                 format_to_use = success_format
@@ -1575,8 +1923,9 @@ class ProfessionalDesktopImageQualityAnalyzer:
                 format_to_use = warning_format
             
             # Apply format to the entire row
-            for col in range(len(detailed_df.columns)):
-                worksheet.write(idx-1, col, detailed_df.iloc[idx-3, col], format_to_use)
+            for col_num, column_name in enumerate(detailed_df.columns):
+                value = row_data[column_name]
+                worksheet.write(excel_row, col_num, value, format_to_use)
         
         # Set column widths
         for i, col in enumerate(detailed_df.columns):
@@ -1766,9 +2115,9 @@ class ProfessionalDesktopImageQualityAnalyzer:
             
             raw_data.append(row_data)
         
-        # Create DataFrame and write to Excel
+        # Create DataFrame and write to Excel - headers=False to avoid duplication
         raw_df = pd.DataFrame(raw_data)
-        raw_df.to_excel(writer, sheet_name='Raw Measurements', index=False, startrow=2)
+        raw_df.to_excel(writer, sheet_name='Raw Measurements', index=False, startrow=2, header=False)
         
         worksheet = writer.sheets['Raw Measurements']
         
@@ -1781,7 +2130,7 @@ class ProfessionalDesktopImageQualityAnalyzer:
             end_col_letter = chr(65 + end_col_index)
             worksheet.merge_range(f'A1:{end_col_letter}1', '🔬 RAW MEASUREMENTS & TECHNICAL DATA', title_format)
         
-        # Add proper headers with formatting
+        # Add proper headers with formatting at row 2 (index 1)
         for col_num, column_title in enumerate(raw_df.columns):
             worksheet.write(1, col_num, column_title, header_format)
         
@@ -1868,9 +2217,9 @@ class ProfessionalDesktopImageQualityAnalyzer:
             
             tech_data.append(row_data)
         
-        # Create DataFrame and write to Excel
+        # Create DataFrame and write to Excel - headers=False to avoid duplication
         tech_df = pd.DataFrame(tech_data)
-        tech_df.to_excel(writer, sheet_name='Technical Analysis', index=False, startrow=2)
+        tech_df.to_excel(writer, sheet_name='Technical Analysis', index=False, startrow=2, header=False)
         
         worksheet = writer.sheets['Technical Analysis']
         
@@ -1882,7 +2231,7 @@ class ProfessionalDesktopImageQualityAnalyzer:
             end_col_letter = chr(65 + end_col_index)
             worksheet.merge_range(f'A1:{end_col_letter}1', '⚙️ TECHNICAL ANALYSIS & COMPUTED METRICS', title_format)
         
-        # Add proper headers with formatting
+        # Add proper headers with formatting at row 2 (index 1)
         for col_num, column_title in enumerate(tech_df.columns):
             worksheet.write(1, col_num, column_title, header_format)
         
@@ -1974,7 +2323,8 @@ class ProfessionalDesktopImageQualityAnalyzer:
         
         # Create DataFrame and write to Excel
         breakdown_df = pd.DataFrame(breakdown_data)
-        breakdown_df.to_excel(writer, sheet_name='Quality Breakdown', index=False, startrow=2)
+        # Write data starting at row 3 (Excel row 3, pandas startrow=2)
+        breakdown_df.to_excel(writer, sheet_name='Quality Breakdown', index=False, startrow=2, header=False)
         
         worksheet = writer.sheets['Quality Breakdown']
         
@@ -1986,15 +2336,17 @@ class ProfessionalDesktopImageQualityAnalyzer:
             end_col_letter = chr(65 + end_col_index)
             worksheet.merge_range(f'A1:{end_col_letter}1', '🎯 QUALITY BREAKDOWN BY CATEGORY', title_format)
         
-        # Add proper headers with formatting
+        # Write column headers manually at row 2 (Excel row 2, index 1)
         for col_num, column_title in enumerate(breakdown_df.columns):
             worksheet.write(1, col_num, column_title, header_format)
         
-        # Apply conditional formatting for status columns
-        for idx, row in enumerate(breakdown_data, start=3):  # Start from row 3 now
+        # Apply conditional formatting for status columns (data starts at row 3, Excel 1-based)
+        for row_idx, row_data in enumerate(breakdown_data):
+            excel_row = row_idx + 2  # Row 3, 4, 5, etc. (0-based indexing: 2, 3, 4, etc.)
+            
             for col_name in breakdown_df.columns:
                 if 'Status' in col_name:
-                    status_value = row[col_name]
+                    status_value = row_data[col_name]
                     col_idx = list(breakdown_df.columns).index(col_name)
                     
                     if status_value == 'PASS':
@@ -2007,7 +2359,7 @@ class ProfessionalDesktopImageQualityAnalyzer:
                         format_to_use = None
                     
                     if format_to_use:
-                        worksheet.write(idx-1, col_idx, status_value, format_to_use)
+                        worksheet.write(excel_row, col_idx, status_value, format_to_use)
         
         # Set column widths
         for i, col in enumerate(breakdown_df.columns):
@@ -2019,6 +2371,177 @@ class ProfessionalDesktopImageQualityAnalyzer:
                 worksheet.set_column(i, i, 15)
         
         print(f"📊 Created Quality Breakdown sheet with {len(breakdown_data)} files and detailed category analysis")
+    
+    def create_sla_compliance_sheet(self, writer, workbook, successful_results, title_format, 
+                                   header_format, success_format, warning_format, fail_format):
+        """Create SLA Compliance sheet showing Service Level Agreement comparison"""
+        import pandas as pd
+        
+        sla_data = []
+        
+        for result in successful_results:
+            sla_info = result.get('sla', {})
+            
+            if not sla_info.get('enabled', False):
+                # If SLA not enabled, show basic info
+                sla_data.append({
+                    'File Name': os.path.basename(result.get('file_path', '')),
+                    'Quality Score': result.get('global', {}).get('score', 0),
+                    'SLA Status': 'Not Configured',
+                    'Compliance Level': 'N/A',
+                    'Overall Compliant': 'N/A',
+                    'Score Requirement': 'N/A',
+                    'Category Failures': 'N/A',
+                    'Performance Targets': 'N/A',
+                    'SLA Recommendations': 'Configure SLA settings to enable compliance checking'
+                })
+                continue
+            
+            compliance = sla_info.get('compliance', {})
+            requirements_met = compliance.get('requirements_met', {})
+            
+            # Get requirement details
+            score_req = requirements_met.get('minimum_score', {})
+            category_req = requirements_met.get('category_failures', {})
+            performance_req = requirements_met.get('performance_targets', {})
+            
+            # Format SLA recommendations 
+            recommendations = sla_info.get('recommendations', [])
+            recommendations_text = '; '.join(recommendations[:2]) if recommendations else 'All requirements met'
+            
+            sla_data.append({
+                'File Name': os.path.basename(result.get('file_path', '')),
+                'Quality Score': result.get('global', {}).get('score', 0),
+                'SLA Name': sla_info.get('sla_name', ''),
+                'Compliance Level': compliance.get('level', '').upper(),
+                'Overall Compliant': 'YES' if compliance.get('overall_compliant', False) else 'NO',
+                'Score Requirement': f"≥{score_req.get('required', 0):.1%} (Actual: {score_req.get('actual', 0):.1%})",
+                'Score Met': 'YES' if score_req.get('compliant', False) else 'NO',
+                'Category Failures': f"≤{category_req.get('max_allowed', 0)} (Actual: {category_req.get('actual', 0)})",
+                'Category Met': 'YES' if category_req.get('compliant', False) else 'NO',
+                'Performance Targets': 'MET' if performance_req.get('compliant', False) else 'FAILED',
+                'SLA Recommendations': recommendations_text
+            })
+        
+        if not sla_data:
+            return
+        
+        # Create DataFrame
+        sla_df = pd.DataFrame(sla_data)
+        
+        # Create worksheet
+        worksheet = workbook.add_worksheet('SLA Compliance')
+        
+        # Add title
+        worksheet.merge_range('A1:K1', '🎯 SERVICE LEVEL AGREEMENT (SLA) COMPLIANCE REPORT', title_format)
+        
+        # Create DataFrame and write to Excel
+        sla_df.to_excel(writer, sheet_name='SLA Compliance', index=False, startrow=2)
+        
+        # Get the xlsxwriter workbook and worksheet objects.
+        worksheet = writer.sheets['SLA Compliance']
+        
+        # Apply conditional formatting
+        for idx, row in sla_df.iterrows():
+            row_num = idx + 3  # Account for title and headers
+            
+            # Format compliance level
+            compliance_level = row.get('Compliance Level', '').lower()
+            if compliance_level in ['excellent', 'compliant']:
+                format_to_use = success_format
+            elif compliance_level == 'warning':
+                format_to_use = warning_format
+            elif compliance_level == 'non_compliant':
+                format_to_use = fail_format
+            else:
+                format_to_use = None
+            
+            if format_to_use and 'Compliance Level' in sla_df.columns:
+                col_idx = list(sla_df.columns).index('Compliance Level')
+                worksheet.write(row_num, col_idx, row['Compliance Level'], format_to_use)
+            
+            # Format overall compliant status
+            overall_compliant = row.get('Overall Compliant', '')
+            if overall_compliant == 'YES':
+                format_to_use = success_format
+            elif overall_compliant == 'NO':
+                format_to_use = fail_format
+            else:
+                format_to_use = None
+            
+            if format_to_use and 'Overall Compliant' in sla_df.columns:
+                col_idx = list(sla_df.columns).index('Overall Compliant')
+                worksheet.write(row_num, col_idx, overall_compliant, format_to_use)
+            
+            # Format individual requirement statuses
+            for col_name in ['Score Met', 'Category Met']:
+                if col_name in sla_df.columns and col_name in row:
+                    status = row[col_name]
+                    if status == 'YES':
+                        format_to_use = success_format
+                    elif status == 'NO':
+                        format_to_use = fail_format
+                    else:
+                        format_to_use = None
+                    
+                    if format_to_use:
+                        col_idx = list(sla_df.columns).index(col_name)
+                        worksheet.write(row_num, col_idx, status, format_to_use)
+            
+            # Format performance targets
+            if 'Performance Targets' in sla_df.columns and 'Performance Targets' in row:
+                status = row['Performance Targets']
+                if status == 'MET':
+                    format_to_use = success_format
+                elif status == 'FAILED':
+                    format_to_use = fail_format
+                else:
+                    format_to_use = None
+                
+                if format_to_use:
+                    col_idx = list(sla_df.columns).index('Performance Targets')
+                    worksheet.write(row_num, col_idx, status, format_to_use)
+        
+        # Set column widths
+        for i, col in enumerate(sla_df.columns):
+            if 'File' in col:
+                worksheet.set_column(i, i, 25)
+            elif 'Recommendations' in col:
+                worksheet.set_column(i, i, 40)
+            elif 'Requirement' in col:
+                worksheet.set_column(i, i, 20)
+            elif 'SLA Name' in col:
+                worksheet.set_column(i, i, 25)
+            else:
+                worksheet.set_column(i, i, 15)
+        
+        # Add SLA summary information
+        if sla_data and sla_data[0].get('SLA Name') != '':
+            summary_start_row = len(sla_data) + 5
+            
+            # Calculate summary statistics
+            compliant_count = sum(1 for row in sla_data if row.get('Overall Compliant') == 'YES')
+            total_count = len(sla_data)
+            compliance_rate = (compliant_count / total_count * 100) if total_count > 0 else 0
+            
+            # Add summary section
+            worksheet.merge_range(f'A{summary_start_row}:K{summary_start_row}', 
+                                '📊 SLA COMPLIANCE SUMMARY', title_format)
+            
+            summary_start_row += 2
+            worksheet.write(f'A{summary_start_row}', 'Total Files Analyzed:', header_format)
+            worksheet.write(f'B{summary_start_row}', total_count)
+            
+            summary_start_row += 1
+            worksheet.write(f'A{summary_start_row}', 'SLA Compliant Files:', header_format)
+            worksheet.write(f'B{summary_start_row}', compliant_count, success_format if compliant_count > 0 else fail_format)
+            
+            summary_start_row += 1
+            worksheet.write(f'A{summary_start_row}', 'Overall Compliance Rate:', header_format)
+            worksheet.write(f'B{summary_start_row}', f'{compliance_rate:.1f}%', 
+                          success_format if compliance_rate >= 80 else warning_format if compliance_rate >= 60 else fail_format)
+        
+        print(f"📊 Created SLA Compliance sheet with {len(sla_data)} files and service level agreement analysis")
     
     def create_color_coding_guide_sheet(self, writer, workbook, title_format, header_format, 
                                        success_format, warning_format, fail_format):
@@ -2885,6 +3408,14 @@ The application works completely offline for your security and privacy.
                         'align': 'center'
                     })
                     
+                    # Format for unknown status - white background
+                    unknown_format = workbook.add_format({
+                        'bg_color': '#ffffff',
+                        'font_color': '#6c757d',
+                        'border': 1,
+                        'align': 'center'
+                    })
+                    
                     # Create Summary Sheet
                     print(f"📊 ===== COMPREHENSIVE EXCEL DEBUG =====")
                     print(f"📊 Creating Excel sheets with results data...")
@@ -2912,7 +3443,7 @@ The application works completely offline for your security and privacy.
                     self.create_summary_sheet(writer, workbook, results, title_format, header_format, metric_header_format)
                     
                     # Create Detailed Metrics Sheet
-                    self.create_metrics_sheet(writer, workbook, results, header_format, metric_header_format, good_format, warning_format, poor_format)
+                    self.create_metrics_sheet(writer, workbook, results, header_format, metric_header_format, good_format, warning_format, poor_format, unknown_format)
                     
                     # Create Recommendations Sheet
                     self.create_recommendations_sheet(writer, workbook, results, header_format, metric_header_format)
@@ -3006,7 +3537,7 @@ The application works completely offline for your security and privacy.
         worksheet.write('A10', 'Quality Gauge:', metric_header_format)
         worksheet.write('B10', gauge_text)
         
-    def create_metrics_sheet(self, writer, workbook, results, header_format, metric_header_format, good_format, warning_format, poor_format):
+    def create_metrics_sheet(self, writer, workbook, results, header_format, metric_header_format, good_format, warning_format, poor_format, unknown_format):
         """Create detailed metrics sheet with conditional formatting"""
         import pandas as pd  # Import here for scope
         
@@ -3022,16 +3553,16 @@ The application works completely offline for your security and privacy.
             # Get status from category_status
             status_text = category_status.get(metric_name, 'unknown')
             
-            # Convert status to score (reverse-engineer scores from category status)
+            # Use actual status values and appropriate scores
             if status_text == 'pass':
-                score = 0.85  # Assume good passing score
-                status = 'EXCELLENT'
+                score = 0.85  # Good passing score
+                status = 'PASS'  # Use actual status
             elif status_text == 'warn':
-                score = 0.70  # Assume warning score
-                status = 'FAIR'
+                score = 0.70  # Warning score
+                status = 'WARN'  # Use actual status
             elif status_text == 'fail':
-                score = 0.30  # Assume failing score
-                status = 'POOR'
+                score = 0.30  # Failing score
+                status = 'FAIL'  # Use actual status
             else:
                 score = 0.50  # Default/unknown
                 status = 'UNKNOWN'
@@ -3070,8 +3601,8 @@ The application works completely offline for your security and privacy.
         # Convert to DataFrame
         metrics_df = pd.DataFrame(metrics_rows)
         
-        # Write to Excel
-        metrics_df.to_excel(writer, sheet_name='Detailed Metrics', index=False, startrow=2)
+        # Write to Excel (data starts at row 4, startrow=3 in pandas means Excel row 4)
+        metrics_df.to_excel(writer, sheet_name='Detailed Metrics', index=False, startrow=3, header=False)
         
         # Get the worksheet
         worksheet = writer.sheets['Detailed Metrics']
@@ -3079,9 +3610,10 @@ The application works completely offline for your security and privacy.
         # Add title
         worksheet.merge_range('A1:F1', '📊 DETAILED QUALITY METRICS', header_format)
         
-        # Format the column headers that pandas already created
-        for col_num, column_title in enumerate(metrics_df.columns):
-            worksheet.write(2, col_num, column_title, metric_header_format)
+        # Write column headers manually at row 3 (Excel row 3, index 2)
+        headers = ['Metric', 'Score', 'Percentage', 'Status', 'Threshold', 'Details']
+        for col_num, header in enumerate(headers):
+            worksheet.write(2, col_num, header, metric_header_format)  # Row 3 in Excel (index 2)
         
         # Format columns
         worksheet.set_column('A:A', 20)  # Metric
@@ -3092,16 +3624,16 @@ The application works completely offline for your security and privacy.
         worksheet.set_column('F:F', 40)  # Details
         
         # Apply conditional formatting based on status
-        for row_num, row_data in enumerate(metrics_rows, start=3):  # Start from row 3 now
+        for row_num, row_data in enumerate(metrics_rows, start=4):  # Start from row 4 (data starts at row 4, 1-based)
             status = row_data['Status']
-            if status == 'EXCELLENT':
+            if status == 'PASS':
                 format_to_use = good_format
-            elif status == 'GOOD':
-                format_to_use = good_format
-            elif status == 'FAIR':
+            elif status == 'WARN':
                 format_to_use = warning_format
-            else:
+            elif status == 'FAIL':
                 format_to_use = poor_format
+            else:  # UNKNOWN or any other status - use white background
+                format_to_use = unknown_format
             
             worksheet.write(f'D{row_num}', status, format_to_use)
             

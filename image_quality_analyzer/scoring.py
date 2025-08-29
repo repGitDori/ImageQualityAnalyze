@@ -4,6 +4,7 @@ Quality scoring and flagging system
 
 from typing import Dict, Any, List, Tuple
 from enum import Enum
+from .sla import SLAEvaluator
 
 
 class Status(Enum):
@@ -17,6 +18,7 @@ class QualityScorer:
     
     def __init__(self, config: Dict[str, Any]):
         self.config = config
+        self.sla_evaluator = SLAEvaluator(config)
         self.category_weights = {
             'completeness': config.get('scoring', {}).get('four_star_weight', 1.0),
             'foreign_objects': config.get('scoring', {}).get('three_star_weight', 1.0), 
@@ -51,9 +53,15 @@ class QualityScorer:
         # Compute global score
         global_result = self._compute_global_score(category_scores, category_status)
         
+        # Evaluate SLA compliance
+        sla_result = self.sla_evaluator.evaluate_sla_compliance(
+            metrics, category_status, global_result['score']
+        )
+        
         return {
             'category_status': category_status,
-            'global': global_result
+            'global': global_result,
+            'sla': sla_result
         }
     
     def _score_category(self, category: str, metrics: Dict[str, Any]) -> Status:

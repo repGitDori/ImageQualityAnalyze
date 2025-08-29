@@ -96,6 +96,35 @@ def analyze(image_path, config, profile, output, graphs, verbose):
         else:
             click.echo("\n✅ No issues found!")
         
+        # SLA Compliance Information
+        sla_info = result.get('sla', {})
+        if sla_info.get('enabled', False):
+            click.echo("\n🎯 SLA Compliance:")
+            compliance = sla_info.get('compliance', {})
+            
+            level = compliance.get('level', 'unknown').upper()
+            compliant = compliance.get('overall_compliant', False)
+            
+            sla_emoji = "✅" if compliant else "❌"
+            click.echo(f"  {sla_emoji} Level: {level}")
+            click.echo(f"  📋 SLA: {sla_info.get('sla_name', 'Quality SLA')}")
+            click.echo(f"  🎯 Compliant: {'YES' if compliant else 'NO'}")
+            
+            if verbose:
+                requirements = compliance.get('requirements_met', {})
+                score_req = requirements.get('minimum_score', {})
+                if score_req:
+                    click.echo(f"  📊 Score Requirement: {score_req.get('required', 0):.1%} (Actual: {score_req.get('actual', 0):.1%})")
+                
+                # Show SLA-specific recommendations
+                sla_recommendations = sla_info.get('recommendations', [])
+                if sla_recommendations:
+                    click.echo("  💡 SLA Recommendations:")
+                    for rec in sla_recommendations[:3]:  # Show top 3
+                        click.echo(f"    {rec}")
+        elif verbose:
+            click.echo("\n🎯 SLA Compliance: Not configured")
+        
         # Generate graphs
         if graphs:
             if verbose:
@@ -210,6 +239,28 @@ def batch(image_dir, config, profile, output, csv, extensions, verbose):
                 percentage = (count / len(valid_results)) * 100
                 emoji = "✅" if status == "pass" else "⚠️" if status == "warn" else "❌"
                 click.echo(f"  {emoji} {status.title()}: {count} ({percentage:.1f}%)")
+        
+        # SLA Batch Summary
+        sla_results = [r.get('sla', {}) for r in valid_results if r.get('sla', {}).get('enabled', False)]
+        if sla_results:
+            from image_quality_analyzer.sla import SLAEvaluator
+            sla_evaluator = SLAEvaluator(analyzer.config)
+            sla_summary = sla_evaluator.get_sla_summary_for_batch(sla_results)
+            
+            if sla_summary.get('enabled', False):
+                click.echo(f"\n🎯 SLA Compliance Summary:")
+                click.echo(f"SLA: {sla_summary.get('sla_name', 'Quality SLA')}")
+                click.echo(f"Overall Compliance Rate: {sla_summary.get('overall_compliance_rate', 0):.1f}%")
+                
+                breakdown = sla_summary.get('compliance_breakdown', {})
+                if breakdown:
+                    click.echo("Compliance Breakdown:")
+                    click.echo(f"  ✅ Excellent: {breakdown.get('excellent', 0)}")
+                    click.echo(f"  ✅ Compliant: {breakdown.get('compliant', 0)}")
+                    click.echo(f"  ⚠️ Warning: {breakdown.get('warning', 0)}")
+                    click.echo(f"  ❌ Non-compliant: {breakdown.get('non_compliant', 0)}")
+        elif verbose:
+            click.echo(f"\n🎯 SLA Compliance: Not configured")
         
         # Export CSV comparison
         if csv:

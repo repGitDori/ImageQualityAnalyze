@@ -75,6 +75,31 @@ DEFAULT_CONFIG = {
         "two_star_weight": 1.0,
         "pass_score_threshold": 0.80,
         "warn_score_threshold": 0.65
+    },
+    "sla": {
+        "enabled": True,
+        "name": "Default Document Quality SLA",
+        "description": "Standard quality requirements for document processing",
+        "requirements": {
+            "min_overall_score": 0.75,
+            "max_fail_categories": 1,
+            "required_pass_categories": ["completeness", "sharpness", "resolution"],
+            "performance_targets": {
+                "sharpness_min_laplacian": 150.0,
+                "contrast_min_global": 0.20,
+                "resolution_min_dpi": 300,
+                "noise_max_std": 0.04,
+                "geometry_max_skew": 1.0,
+                "exposure_max_highlight_clip": 0.5,
+                "exposure_max_shadow_clip": 0.5
+            }
+        },
+        "compliance_levels": {
+            "excellent": {"min_score": 0.90, "description": "Exceeds all SLA requirements"},
+            "compliant": {"min_score": 0.75, "description": "Meets all SLA requirements"},
+            "warning": {"min_score": 0.60, "description": "Below SLA but usable"},
+            "non_compliant": {"min_score": 0.0, "description": "Does not meet SLA requirements"}
+        }
     }
 }
 
@@ -186,6 +211,70 @@ CONFIG_SCHEMA = {
                 "two_star_weight": {"type": "number"},
                 "pass_score_threshold": {"type": "number"},
                 "warn_score_threshold": {"type": "number"}
+            }
+        },
+        "sla": {
+            "type": "object",
+            "properties": {
+                "enabled": {"type": "boolean"},
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "requirements": {
+                    "type": "object",
+                    "properties": {
+                        "min_overall_score": {"type": "number"},
+                        "max_fail_categories": {"type": "number"},
+                        "required_pass_categories": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        },
+                        "performance_targets": {
+                            "type": "object",
+                            "properties": {
+                                "sharpness_min_laplacian": {"type": "number"},
+                                "contrast_min_global": {"type": "number"},
+                                "resolution_min_dpi": {"type": "number"},
+                                "noise_max_std": {"type": "number"},
+                                "geometry_max_skew": {"type": "number"},
+                                "exposure_max_highlight_clip": {"type": "number"},
+                                "exposure_max_shadow_clip": {"type": "number"}
+                            }
+                        }
+                    }
+                },
+                "compliance_levels": {
+                    "type": "object",
+                    "properties": {
+                        "excellent": {
+                            "type": "object",
+                            "properties": {
+                                "min_score": {"type": "number"},
+                                "description": {"type": "string"}
+                            }
+                        },
+                        "compliant": {
+                            "type": "object",
+                            "properties": {
+                                "min_score": {"type": "number"},
+                                "description": {"type": "string"}
+                            }
+                        },
+                        "warning": {
+                            "type": "object",
+                            "properties": {
+                                "min_score": {"type": "number"},
+                                "description": {"type": "string"}
+                            }
+                        },
+                        "non_compliant": {
+                            "type": "object",
+                            "properties": {
+                                "min_score": {"type": "number"},
+                                "description": {"type": "string"}
+                            }
+                        }
+                    }
+                }
             }
         }
     }
