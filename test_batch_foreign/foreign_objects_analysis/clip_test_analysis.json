@@ -1,0 +1,77 @@
+{
+  "foreign_object_flag": true,
+  "foreign_object_area_pct": 5.701978265012676,
+  "failure_reasons": [
+    "Black objects penetrating 3.8% of document"
+  ],
+  "recommendations": [
+    "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+    "\ud83d\udc4b Keep hands away from document during capture",
+    "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference"
+  ],
+  "detailed_results": {
+    "clips_and_tools": {
+      "detected_clips": [
+        {
+          "bbox": [
+            20,
+            50,
+            131,
+            159
+          ],
+          "area": 9034.5,
+          "aspect_ratio": 0.8238993710691824,
+          "pixelation_score": 1.0,
+          "position": "left",
+          "type": "clip_or_tool"
+        }
+      ],
+      "clip_count": 1,
+      "total_clip_area": 9034.5,
+      "clip_area_percentage": 1.8821875,
+      "clip_flag": false
+    },
+    "black_objects": {
+      "detected_black_objects": [
+        {
+          "bbox": [
+            0,
+            20,
+            151,
+            209
+          ],
+          "area": 17387.0,
+          "penetration_depth": 0.09403577385402888,
+          "contrast_ratio": 2.033268783360573,
+          "type": "large_object",
+          "centroid": [
+            44,
+            122
+          ]
+        }
+      ],
+      "black_object_count": 1,
+      "total_black_area": 17387.0,
+      "black_area_percentage": 3.819790765012676,
+      "black_object_flag": true
+    },
+    "shadows_reflections": {
+      "shadow_area": 2301,
+      "shadow_percentage": 0.505512080881933,
+      "shadow_flag": false,
+      "reflection_area": 0,
+      "reflection_percentage": 0.0,
+      "reflection_flag": false,
+      "luminance_stats": {
+        "average": 254.98925704443496,
+        "std_dev": 0.17834204866163147,
+        "shadow_threshold": 254.6325729471117,
+        "reflection_threshold": 255.34594114175823
+      }
+    }
+  },
+  "summary": {
+    "total_objects_detected": 2,
+    "image_quality_impact": "HIGH - Significant quality degradation"
+  }
+}

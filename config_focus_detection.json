@@ -1,0 +1,140 @@
+{
+  "profile_name": "Enhanced Focus Detection",
+  "description": "Configuration optimized for detailed focus quality analysis with specific out-of-focus flagging",
+  
+  "sharpness": {
+    "min_laplacian_variance": 200.0,
+    "warn_laplacian_variance": 120.0,
+    "fail_laplacian_variance": 80.0,
+    "critical_fail_laplacian": 50.0,
+    
+    "min_edge_density": 0.015,
+    "min_high_freq_energy": 0.001,
+    "local_sharpness_threshold": 100.0,
+    
+    "focus_classification": {
+      "excellent": {
+        "min_laplacian": 300.0,
+        "min_edge_density": 0.020,
+        "description": "Perfectly Sharp - Professional Quality"
+      },
+      "good": {
+        "min_laplacian": 200.0,
+        "min_edge_density": 0.015,
+        "description": "Sharp - Suitable for Most Uses"
+      },
+      "acceptable": {
+        "min_laplacian": 120.0,
+        "min_edge_density": 0.012,
+        "description": "Slightly Soft - Usable with Minor Issues"
+      },
+      "poor": {
+        "min_laplacian": 80.0,
+        "min_edge_density": 0.008,
+        "description": "Out of Focus - Noticeable Blur"
+      },
+      "unusable": {
+        "min_laplacian": 0.0,
+        "min_edge_density": 0.0,
+        "description": "Severely Out of Focus - Unusable"
+      }
+    },
+    
+    "failure_messages": {
+      "out_of_focus": "Image failed for OUT OF FOCUS",
+      "motion_blur": "Image failed for MOTION BLUR", 
+      "camera_shake": "Image failed for CAMERA SHAKE",
+      "poor_focus": "Image failed for POOR FOCUS QUALITY",
+      "severe_blur": "Image failed for SEVERE BLUR - unusable"
+    },
+    
+    "recommendations": {
+      "out_of_focus": [
+        "Use auto-focus or tap screen to focus on document",
+        "Ensure proper distance - too close/far causes focus issues",
+        "Clean camera lens - dirt affects focus quality",
+        "Use adequate lighting for better auto-focus"
+      ],
+      "motion_blur": [
+        "Use tripod or stable surface to reduce camera shake",
+        "Use faster shutter speed if available",
+        "Use timer or remote shutter to avoid camera movement",
+        "Brace camera against stable object"
+      ],
+      "soft_focus": [
+        "Fine-tune focus or move slightly closer/further",
+        "Use manual focus if available",
+        "Ensure document is flat and parallel to camera",
+        "Consider retaking for better quality"
+      ]
+    }
+  },
+  
+  "scoring": {
+    "pass_score_threshold": 0.75,
+    "warn_score_threshold": 0.60,
+    "focus_weight": 2.0,
+    "critical_focus_failure": true
+  },
+  
+  "batch_analysis": {
+    "focus_failure_threshold": 80.0,
+    "generate_focus_report": true,
+    "group_by_focus_level": true,
+    "export_failed_images_list": true
+  },
+  
+  "reporting": {
+    "include_focus_heatmap": true,
+    "include_frequency_analysis": true,
+    "detailed_recommendations": true,
+    "focus_confidence_score": true
+  },
+  
+  "exposure": {
+    "max_shadow_clip_pct": 2.0,
+    "max_highlight_clip_pct": 2.0,
+    "illumination_uniformity_warn": 0.20,
+    "illumination_uniformity_fail": 0.35
+  },
+  
+  "contrast": {
+    "min_global_contrast": 0.15,
+    "warn_global_contrast": 0.10
+  },
+  
+  "geometry": {
+    "max_skew_deg_pass": 2.0,
+    "max_skew_deg_warn": 5.0
+  },
+  
+  "resolution": {
+    "min_dpi_text": 150,
+    "min_dpi_archival": 300
+  },
+  
+  "completeness": {
+    "min_content_bbox_coverage": 0.80
+  },
+  
+  "border_background": {
+    "max_side_margin_ratio_pass": 0.15,
+    "max_side_margin_ratio_warn": 0.20,
+    "max_bg_median_luminance": 0.15
+  },
+  
+  "noise": {
+    "max_bg_noise_std": 0.08,
+    "warn_bg_noise_std": 0.10
+  },
+  
+  "format_integrity": {
+    "bit_depth_min": 8,
+    "allowed_formats": ["JPEG", "PNG", "TIFF", "BMP"]
+  },
+  
+  "color": {
+    "enabled": true,
+    "max_hue_cast_degrees_warn": 8.0
+  }
+}

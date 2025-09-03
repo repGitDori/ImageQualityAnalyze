@@ -1,0 +1,40 @@
+{
+  "foreign_object_flag": false,
+  "foreign_object_area_pct": 0.0,
+  "failure_reasons": [],
+  "recommendations": [],
+  "detailed_results": {
+    "clips_and_tools": {
+      "detected_clips": [],
+      "clip_count": 0,
+      "total_clip_area": 0,
+      "clip_area_percentage": 0.0,
+      "clip_flag": false
+    },
+    "black_objects": {
+      "detected_black_objects": [],
+      "black_object_count": 0,
+      "total_black_area": 0,
+      "black_area_percentage": 0.0,
+      "black_object_flag": false
+    },
+    "shadows_reflections": {
+      "shadow_area": 10040,
+      "shadow_percentage": 1.2643466828529908,
+      "shadow_flag": false,
+      "reflection_area": 0,
+      "reflection_percentage": 0.0,
+      "reflection_flag": false,
+      "luminance_stats": {
+        "average": 254.46591804917855,
+        "std_dev": 4.560757242810684,
+        "shadow_threshold": 245.3444035635572,
+        "reflection_threshold": 263.5874325347999
+      }
+    }
+  },
+  "summary": {
+    "total_objects_detected": 0,
+    "image_quality_impact": "LOW - Minor impact on quality"
+  }
+}

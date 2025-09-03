@@ -1,0 +1,41 @@
+{
+  "foreign_objects": {
+    "clip_detection": {
+      "min_contour_area": 1000,
+      "max_border_luminance": 0.15,
+      "pixelation_threshold": 0.3,
+      "aspect_ratio_range": [0.1, 10.0],
+      "edge_proximity": 50,
+      "failure_threshold": 2.0
+    },
+    "black_object_detection": {
+      "min_darkness_threshold": 0.1,
+      "min_object_area": 500,
+      "document_penetration": 0.05,
+      "contrast_ratio": 2.0,
+      "shadow_detection": true,
+      "failure_threshold": 1.0
+    },
+    "failure_thresholds": {
+      "clip_area_pct": 2.0,
+      "black_object_area_pct": 1.0,
+      "combined_area_pct": 3.0
+    },
+    "quality_assessment": {
+      "severe_threshold": 10.0,
+      "high_threshold": 5.0,
+      "moderate_threshold": 2.0
+    }
+  },
+  "report_settings": {
+    "include_recommendations": true,
+    "include_detailed_breakdown": true,
+    "include_object_locations": true,
+    "generate_failure_summary": true
+  },
+  "detection_sensitivity": {
+    "clip_sensitivity": "high",
+    "black_object_sensitivity": "medium", 
+    "shadow_sensitivity": "low"
+  }
+}

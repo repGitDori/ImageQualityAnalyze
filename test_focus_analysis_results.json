@@ -1,0 +1,104 @@
+{
+  "summary": {
+    "total_images": 5,
+    "focus_distribution": {
+      "excellent": 2,
+      "good": 1,
+      "acceptable": 0,
+      "poor": 0,
+      "unusable": 2
+    },
+    "out_of_focus_count": 2,
+    "usable_count": 3
+  },
+  "detailed_results": [
+    {
+      "image_path": "sample_document.jpg",
+      "filename": "sample_document.jpg",
+      "focus_level": "excellent",
+      "focus_score": 2390.31639,
+      "overall_score": 0.5,
+      "overall_status": "fail",
+      "focus_issues": [
+        "Inconsistent focus across image - focus on wrong area"
+      ],
+      "focus_recommendations": [
+        "\ud83c\udfaf Focus on center of document, not edges or background"
+      ]
+    },
+    {
+      "image_path": "sample_images\\blurry_doc.jpg",
+      "filename": "blurry_doc.jpg",
+      "focus_level": "unusable",
+      "focus_score": 0.15334166666666665,
+      "overall_score": 0.4,
+      "overall_status": "fail",
+      "focus_issues": [
+        "Severely out of focus - major blur detected",
+        "Very low edge content - possible motion blur or extreme defocus",
+        "Uniform blur - camera shake or motion blur",
+        "Very weak gradients - severe focus or contrast issues"
+      ],
+      "focus_recommendations": [
+        "\ud83d\udd34 CRITICAL: Image failed for OUT OF FOCUS - retake required",
+        "\ud83d\udcf8 Use auto-focus or tap screen to focus on document",
+        "\ud83c\udfaf Ensure proper distance - too close causes focus issues",
+        "\ud83d\udcf1 Use tripod or stable surface to reduce camera shake",
+        "\u26a1 Use faster shutter speed or better stabilization",
+        "\u26a1 Use faster shutter speed or better stabilization",
+        "\u26a0\ufe0f Focus assessment has lower confidence - verify manually"
+      ]
+    },
+    {
+      "image_path": "sample_images\\dark_doc.jpg",
+      "filename": "dark_doc.jpg",
+      "focus_level": "unusable",
+      "focus_score": 0.0,
+      "overall_score": 0.4,
+      "overall_status": "fail",
+      "focus_issues": [
+        "Severely out of focus - major blur detected",
+        "Very low edge content - possible motion blur or extreme defocus",
+        "Uniform blur - camera shake or motion blur",
+        "Very weak gradients - severe focus or contrast issues"
+      ],
+      "focus_recommendations": [
+        "\ud83d\udd34 CRITICAL: Image failed for OUT OF FOCUS - retake required",
+        "\ud83d\udcf8 Use auto-focus or tap screen to focus on document",
+        "\ud83c\udfaf Ensure proper distance - too close causes focus issues",
+        "\ud83d\udcf1 Use tripod or stable surface to reduce camera shake",
+        "\u26a1 Use faster shutter speed or better stabilization",
+        "\u26a1 Use faster shutter speed or better stabilization",
+        "\u26a0\ufe0f Focus assessment has lower confidence - verify manually"
+      ]
+    },
+    {
+      "image_path": "sample_images\\good_doc.jpg",
+      "filename": "good_doc.jpg",
+      "focus_level": "good",
+      "focus_score": 1199.9157833333334,
+      "overall_score": 0.5,
+      "overall_status": "fail",
+      "focus_issues": [
+        "Low edge content - soft focus or low contrast"
+      ],
+      "focus_recommendations": [
+        "\ud83d\udca1 Improve lighting to enhance detail visibility"
+      ]
+    },
+    {
+      "image_path": "sample_images\\sample_document.jpg",
+      "filename": "sample_document.jpg",
+      "focus_level": "excellent",
+      "focus_score": 2390.31639,
+      "overall_score": 0.5,
+      "overall_status": "fail",
+      "focus_issues": [
+        "Inconsistent focus across image - focus on wrong area"
+      ],
+      "focus_recommendations": [
+        "\ud83c\udfaf Focus on center of document, not edges or background"
+      ]
+    }
+  ]
+}

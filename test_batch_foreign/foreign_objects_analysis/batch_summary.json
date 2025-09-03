@@ -1,0 +1,563 @@
+{
+  "total_images": 8,
+  "processed": 8,
+  "passed": 2,
+  "failed": 6,
+  "failed_foreign_objects": 6,
+  "results": [
+    {
+      "image_path": "test_batch_foreign\\black_object_test.jpg",
+      "result": {
+        "foreign_object_flag": true,
+        "foreign_object_area_pct": 7.545511243954389,
+        "failure_reasons": [
+          "Black objects penetrating 7.5% of document",
+          "Shadows covering 7.1% of document"
+        ],
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+          "\ud83d\udc4b Keep hands away from document during capture",
+          "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference",
+          "\ud83c\udf1e Improve lighting to eliminate shadows on document",
+          "\ud83d\udca1 Use diffused lighting from multiple angles",
+          "\ud83d\udcf1 Position camera directly above document to minimize shadows"
+        ],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [],
+            "clip_count": 0,
+            "total_clip_area": 0,
+            "clip_area_percentage": 0.0,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [
+              {
+                "bbox": [
+                  211,
+                  105,
+                  198,
+                  264
+                ],
+                "area": 32060.5,
+                "penetration_depth": 0.052026637139158775,
+                "contrast_ratio": 8.17535204116358,
+                "type": "large_object",
+                "centroid": [
+                  319,
+                  230
+                ]
+              }
+            ],
+            "black_object_count": 1,
+            "total_black_area": 32060.5,
+            "black_area_percentage": 7.545511243954389,
+            "black_object_flag": true
+          },
+          "shadows_reflections": {
+            "shadow_area": 30180,
+            "shadow_percentage": 7.102931312441897,
+            "shadow_flag": true,
+            "reflection_area": 0,
+            "reflection_percentage": 0.0,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 250.16481719012933,
+              "std_dev": 17.46022209174172,
+              "shadow_threshold": 215.2443730066459,
+              "reflection_threshold": 285.08526137361275
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 1,
+          "image_quality_impact": "SEVERE - Document unusable"
+        }
+      },
+      "passed": false
+    },
+    {
+      "image_path": "test_batch_foreign\\clip_test.jpg",
+      "result": {
+        "foreign_object_flag": true,
+        "foreign_object_area_pct": 5.701978265012676,
+        "failure_reasons": [
+          "Black objects penetrating 3.8% of document"
+        ],
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+          "\ud83d\udc4b Keep hands away from document during capture",
+          "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference"
+        ],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [
+              {
+                "bbox": [
+                  20,
+                  50,
+                  131,
+                  159
+                ],
+                "area": 9034.5,
+                "aspect_ratio": 0.8238993710691824,
+                "pixelation_score": 1.0,
+                "position": "left",
+                "type": "clip_or_tool"
+              }
+            ],
+            "clip_count": 1,
+            "total_clip_area": 9034.5,
+            "clip_area_percentage": 1.8821875,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [
+              {
+                "bbox": [
+                  0,
+                  20,
+                  151,
+                  209
+                ],
+                "area": 17387.0,
+                "penetration_depth": 0.09403577385402888,
+                "contrast_ratio": 2.033268783360573,
+                "type": "large_object",
+                "centroid": [
+                  44,
+                  122
+                ]
+              }
+            ],
+            "black_object_count": 1,
+            "total_black_area": 17387.0,
+            "black_area_percentage": 3.819790765012676,
+            "black_object_flag": true
+          },
+          "shadows_reflections": {
+            "shadow_area": 2301,
+            "shadow_percentage": 0.505512080881933,
+            "shadow_flag": false,
+            "reflection_area": 0,
+            "reflection_percentage": 0.0,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 254.98925704443496,
+              "std_dev": 0.17834204866163147,
+              "shadow_threshold": 254.6325729471117,
+              "reflection_threshold": 255.34594114175823
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 2,
+          "image_quality_impact": "HIGH - Significant quality degradation"
+        }
+      },
+      "passed": false
+    },
+    {
+      "image_path": "test_batch_foreign\\combined_test.jpg",
+      "result": {
+        "foreign_object_flag": true,
+        "foreign_object_area_pct": 5.370869538089526,
+        "failure_reasons": [
+          "Black objects penetrating 4.1% of document"
+        ],
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+          "\ud83d\udc4b Keep hands away from document during capture",
+          "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference"
+        ],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [
+              {
+                "bbox": [
+                  0,
+                  96,
+                  31,
+                  207
+                ],
+                "area": 5925.0,
+                "aspect_ratio": 0.1497584541062802,
+                "pixelation_score": 1.0,
+                "position": "left",
+                "type": "clip_or_tool"
+              }
+            ],
+            "clip_count": 1,
+            "total_clip_area": 5925.0,
+            "clip_area_percentage": 1.234375,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [
+              {
+                "bbox": [
+                  0,
+                  80,
+                  63,
+                  239
+                ],
+                "area": 14378.0,
+                "penetration_depth": 0.14139657810543887,
+                "contrast_ratio": 2.1869451673681537,
+                "type": "linear_object",
+                "centroid": [
+                  30,
+                  199
+                ]
+              }
+            ],
+            "black_object_count": 1,
+            "total_black_area": 14378.0,
+            "black_area_percentage": 4.136494538089526,
+            "black_object_flag": true
+          },
+          "shadows_reflections": {
+            "shadow_area": 1936,
+            "shadow_percentage": 0.5569796512547865,
+            "shadow_flag": false,
+            "reflection_area": 4541,
+            "reflection_percentage": 1.3064279939813976,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 242.00772464030794,
+              "std_dev": 0.2064183583160181,
+              "shadow_threshold": 241.5948879236759,
+              "reflection_threshold": 242.42056135693997
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 2,
+          "image_quality_impact": "HIGH - Significant quality degradation"
+        }
+      },
+      "passed": false
+    },
+    {
+      "image_path": "test_batch_foreign\\good_document.jpg",
+      "result": {
+        "foreign_object_flag": false,
+        "foreign_object_area_pct": 0.0,
+        "failure_reasons": [],
+        "recommendations": [],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [],
+            "clip_count": 0,
+            "total_clip_area": 0,
+            "clip_area_percentage": 0.0,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [],
+            "black_object_count": 0,
+            "total_black_area": 0,
+            "black_area_percentage": 0.0,
+            "black_object_flag": false
+          },
+          "shadows_reflections": {
+            "shadow_area": 10040,
+            "shadow_percentage": 1.2643466828529908,
+            "shadow_flag": false,
+            "reflection_area": 0,
+            "reflection_percentage": 0.0,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 254.46591804917855,
+              "std_dev": 4.560757242810684,
+              "shadow_threshold": 245.3444035635572,
+              "reflection_threshold": 263.5874325347999
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 0,
+          "image_quality_impact": "LOW - Minor impact on quality"
+        }
+      },
+      "passed": true
+    },
+    {
+      "image_path": "test_batch_foreign\\black_object_test.jpg",
+      "result": {
+        "foreign_object_flag": true,
+        "foreign_object_area_pct": 7.545511243954389,
+        "failure_reasons": [
+          "Black objects penetrating 7.5% of document",
+          "Shadows covering 7.1% of document"
+        ],
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+          "\ud83d\udc4b Keep hands away from document during capture",
+          "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference",
+          "\ud83c\udf1e Improve lighting to eliminate shadows on document",
+          "\ud83d\udca1 Use diffused lighting from multiple angles",
+          "\ud83d\udcf1 Position camera directly above document to minimize shadows"
+        ],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [],
+            "clip_count": 0,
+            "total_clip_area": 0,
+            "clip_area_percentage": 0.0,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [
+              {
+                "bbox": [
+                  211,
+                  105,
+                  198,
+                  264
+                ],
+                "area": 32060.5,
+                "penetration_depth": 0.052026637139158775,
+                "contrast_ratio": 8.17535204116358,
+                "type": "large_object",
+                "centroid": [
+                  319,
+                  230
+                ]
+              }
+            ],
+            "black_object_count": 1,
+            "total_black_area": 32060.5,
+            "black_area_percentage": 7.545511243954389,
+            "black_object_flag": true
+          },
+          "shadows_reflections": {
+            "shadow_area": 30180,
+            "shadow_percentage": 7.102931312441897,
+            "shadow_flag": true,
+            "reflection_area": 0,
+            "reflection_percentage": 0.0,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 250.16481719012933,
+              "std_dev": 17.46022209174172,
+              "shadow_threshold": 215.2443730066459,
+              "reflection_threshold": 285.08526137361275
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 1,
+          "image_quality_impact": "SEVERE - Document unusable"
+        }
+      },
+      "passed": false
+    },
+    {
+      "image_path": "test_batch_foreign\\clip_test.jpg",
+      "result": {
+        "foreign_object_flag": true,
+        "foreign_object_area_pct": 5.701978265012676,
+        "failure_reasons": [
+          "Black objects penetrating 3.8% of document"
+        ],
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+          "\ud83d\udc4b Keep hands away from document during capture",
+          "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference"
+        ],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [
+              {
+                "bbox": [
+                  20,
+                  50,
+                  131,
+                  159
+                ],
+                "area": 9034.5,
+                "aspect_ratio": 0.8238993710691824,
+                "pixelation_score": 1.0,
+                "position": "left",
+                "type": "clip_or_tool"
+              }
+            ],
+            "clip_count": 1,
+            "total_clip_area": 9034.5,
+            "clip_area_percentage": 1.8821875,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [
+              {
+                "bbox": [
+                  0,
+                  20,
+                  151,
+                  209
+                ],
+                "area": 17387.0,
+                "penetration_depth": 0.09403577385402888,
+                "contrast_ratio": 2.033268783360573,
+                "type": "large_object",
+                "centroid": [
+                  44,
+                  122
+                ]
+              }
+            ],
+            "black_object_count": 1,
+            "total_black_area": 17387.0,
+            "black_area_percentage": 3.819790765012676,
+            "black_object_flag": true
+          },
+          "shadows_reflections": {
+            "shadow_area": 2301,
+            "shadow_percentage": 0.505512080881933,
+            "shadow_flag": false,
+            "reflection_area": 0,
+            "reflection_percentage": 0.0,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 254.98925704443496,
+              "std_dev": 0.17834204866163147,
+              "shadow_threshold": 254.6325729471117,
+              "reflection_threshold": 255.34594114175823
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 2,
+          "image_quality_impact": "HIGH - Significant quality degradation"
+        }
+      },
+      "passed": false
+    },
+    {
+      "image_path": "test_batch_foreign\\combined_test.jpg",
+      "result": {
+        "foreign_object_flag": true,
+        "foreign_object_area_pct": 5.370869538089526,
+        "failure_reasons": [
+          "Black objects penetrating 4.1% of document"
+        ],
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Remove hands, fingers, or objects from document area",
+          "\ud83d\udc4b Keep hands away from document during capture",
+          "\ud83d\udcf8 Use timer mode or remote shutter to avoid hand interference"
+        ],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [
+              {
+                "bbox": [
+                  0,
+                  96,
+                  31,
+                  207
+                ],
+                "area": 5925.0,
+                "aspect_ratio": 0.1497584541062802,
+                "pixelation_score": 1.0,
+                "position": "left",
+                "type": "clip_or_tool"
+              }
+            ],
+            "clip_count": 1,
+            "total_clip_area": 5925.0,
+            "clip_area_percentage": 1.234375,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [
+              {
+                "bbox": [
+                  0,
+                  80,
+                  63,
+                  239
+                ],
+                "area": 14378.0,
+                "penetration_depth": 0.14139657810543887,
+                "contrast_ratio": 2.1869451673681537,
+                "type": "linear_object",
+                "centroid": [
+                  30,
+                  199
+                ]
+              }
+            ],
+            "black_object_count": 1,
+            "total_black_area": 14378.0,
+            "black_area_percentage": 4.136494538089526,
+            "black_object_flag": true
+          },
+          "shadows_reflections": {
+            "shadow_area": 1936,
+            "shadow_percentage": 0.5569796512547865,
+            "shadow_flag": false,
+            "reflection_area": 4541,
+            "reflection_percentage": 1.3064279939813976,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 242.00772464030794,
+              "std_dev": 0.2064183583160181,
+              "shadow_threshold": 241.5948879236759,
+              "reflection_threshold": 242.42056135693997
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 2,
+          "image_quality_impact": "HIGH - Significant quality degradation"
+        }
+      },
+      "passed": false
+    },
+    {
+      "image_path": "test_batch_foreign\\good_document.jpg",
+      "result": {
+        "foreign_object_flag": false,
+        "foreign_object_area_pct": 0.0,
+        "failure_reasons": [],
+        "recommendations": [],
+        "detailed_results": {
+          "clips_and_tools": {
+            "detected_clips": [],
+            "clip_count": 0,
+            "total_clip_area": 0,
+            "clip_area_percentage": 0.0,
+            "clip_flag": false
+          },
+          "black_objects": {
+            "detected_black_objects": [],
+            "black_object_count": 0,
+            "total_black_area": 0,
+            "black_area_percentage": 0.0,
+            "black_object_flag": false
+          },
+          "shadows_reflections": {
+            "shadow_area": 10040,
+            "shadow_percentage": 1.2643466828529908,
+            "shadow_flag": false,
+            "reflection_area": 0,
+            "reflection_percentage": 0.0,
+            "reflection_flag": false,
+            "luminance_stats": {
+              "average": 254.46591804917855,
+              "std_dev": 4.560757242810684,
+              "shadow_threshold": 245.3444035635572,
+              "reflection_threshold": 263.5874325347999
+            }
+          }
+        },
+        "summary": {
+          "total_objects_detected": 0,
+          "image_quality_impact": "LOW - Minor impact on quality"
+        }
+      },
+      "passed": true
+    }
+  ]
+}
