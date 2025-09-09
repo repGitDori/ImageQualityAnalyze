@@ -1,0 +1,140 @@
+DUAL LICENSE AGREEMENT - ImageQualityAnalyzer
+
+Copyright (c) 2025 Dorian Lapi
+All Rights Reserved
+
+IMPORTANT: READ CAREFULLY BEFORE USING THIS SOFTWARE
+
+This software is provided under a DUAL LICENSE system:
+
+═══════════════════════════════════════════════════════════════════
+
+1. OPEN SOURCE LICENSE (Non-Commercial Use)
+   - MIT License applies for:
+     ✅ Personal use
+     ✅ Educational use  
+     ✅ Research use
+     ✅ Non-profit organizations
+     ✅ Individual developers (personal projects)
+
+2. COMMERCIAL LICENSE (Enterprise/Business Use)
+   🔴 COMMERCIAL LICENSE REQUIRED for:
+     - Any business use
+     - Enterprise deployment
+     - Commercial products or services
+     - Revenue-generating applications
+     - Corporate environments
+     - Resale or redistribution for profit
+
+═══════════════════════════════════════════════════════════════════
+
+COMMERCIAL LICENSE REQUIREMENTS:
+
+🏢 ENTERPRISE USE DEFINITION:
+Any use by, for, or on behalf of:
+- Corporations, LLCs, partnerships, or other business entities
+- Government agencies or contractors
+- Organizations with annual revenue > $10,000 USD
+- Commercial products or services (regardless of revenue)
+- Professional consulting or service provision
+
+💰 COMMERCIAL LICENSE TERMS:
+- License fee: Contact databasemaestro@gmail.com for pricing
+- Per-deployment licensing available
+- Enterprise volume discounts available
+- Custom licensing terms for large organizations
+- Perpetual license with maintenance options
+
+📧 TO OBTAIN COMMERCIAL LICENSE:
+Contact: databasemaestro@gmail.com
+Subject: "ImageQualityAnalyzer Commercial License Request"
+Include:
+- Company name and size
+- Intended use case
+- Deployment scope
+- Timeline requirements
+
+═══════════════════════════════════════════════════════════════════
+
+ANTI-THEFT AND ANTI-SCAM PROVISIONS:
+
+🚫 PROHIBITED ACTIVITIES:
+- Using this software commercially without proper license
+- Removing copyright notices or license information
+- Claiming ownership or authorship of this software
+- Redistributing commercially without authorization
+- Reverse engineering for commercial purposes
+- Creating competing products without proper licensing
+
+⚖️ LEGAL ENFORCEMENT:
+- Violation of this license constitutes copyright infringement
+- Unauthorized commercial use subject to damages and legal fees
+- Digital watermarking and tracking implemented
+- Regular audits of commercial usage
+- Legal action will be pursued against violators
+
+🔒 PROTECTION MEASURES:
+- This software contains digital fingerprints
+- Usage tracking and reporting capabilities
+- License verification systems
+- Automatic detection of unauthorized deployment
+- Evidence collection for legal proceedings
+
+═══════════════════════════════════════════════════════════════════
+
+WARRANTY AND LIABILITY DISCLAIMER:
+
+⚠️ NO WARRANTIES:
+This software is provided "AS IS" without any warranties:
+- NO WARRANTY of merchantability or fitness for purpose
+- NO WARRANTY that software will meet your requirements
+- NO WARRANTY that operation will be uninterrupted or error-free
+- NO LIABILITY for any damages, direct or indirect
+- NO PROMISES or guarantees of performance or results
+
+🛡️ LIMITATION OF LIABILITY:
+- Total liability limited to license fees paid (if any)
+- No liability for lost profits, data, or business interruption
+- User assumes all risks of using this software
+- Author not responsible for any consequences of use
+
+═══════════════════════════════════════════════════════════════════
+
+LICENSE VERIFICATION:
+
+📋 COMPLIANCE REQUIREMENTS:
+- Commercial users must maintain license documentation
+- License verification may be requested at any time
+- Proof of licensing must be available for audit
+- Unauthorized use subject to immediate termination
+
+🔍 AUDIT RIGHTS:
+- Right to audit commercial usage upon reasonable notice
+- Access to deployment and usage records if requested
+- Cooperation required for license compliance verification
+
+═══════════════════════════════════════════════════════════════════
+
+CONTACT INFORMATION:
+
+📧 Email: databasemaestro@gmail.com
+📜 License Inquiries: Include "COMMERCIAL LICENSE" in subject
+🏢 Enterprise Sales: Include company details and use case
+⚖️ Legal/Compliance: Include "LEGAL" in subject line
+
+═══════════════════════════════════════════════════════════════════
+
+ACCEPTANCE:
+
+By using this software, you acknowledge that you have read, 
+understood, and agree to be bound by this license agreement.
+
+If you do not agree to these terms, you are not authorized 
+to use this software.
+
+═══════════════════════════════════════════════════════════════════
+
+Copyright (c) 2025 Dorian Lapi. All Rights Reserved.
+Contact: databasemaestro@gmail.com
+
+Last Updated: September 9, 2025

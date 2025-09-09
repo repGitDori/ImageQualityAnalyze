@@ -1,6 +1,9 @@
 """
 Enhanced Focus Detection and Customization for Image Quality Analyzer
 
+Copyright (c) 2025 Dorian Lapi
+Licensed under the MIT License - see LICENSE file for details
+
 This module provides customized focus detection capabilities with specific 
 "out of focus" flagging and detailed reporting for batch analysis.
 
@@ -10,6 +13,8 @@ Features:
 - Customizable thresholds for different focus levels
 - Detailed focus analysis breakdown in reports
 - Batch processing with focus-specific filtering
+
+Original Author: Dorian Lapi
 """
 
 import json

@@ -1,18 +1,38 @@
 """
 Enhanced Foreign Objects Detection for Document Analysis
 
+Copyright (c) 2025 Dorian Lapi
+DUAL LICENSE: Free for non-commercial use, Commercial license required for business use
+Licensed under Dual License - see LICENSE and DUAL_LICENSE.txt for details
+
+⚠️ COMMERCIAL USE REQUIRES LICENSE ⚠️
+Contact: databasemaestro@gmail.com for commercial licensing
+
 This enhanced system detects two main types of foreign objects:
 1. Tools/clips holding pages - create pixelated backgrounds with non-black borders
 2. Black foreign objects - go deep into document area (hands, shadows, etc.)
 
 Based on real-world document scanning scenarios where foreign objects 
 interfere with proper document capture.
+
+Original Author: Dorian Lapi
 """
 
 import numpy as np
 import cv2
 from typing import Dict, Any, Optional, List, Tuple
 from pathlib import Path
+
+# License enforcement
+try:
+    from license_enforcement import verify_license_on_import
+    verify_license_on_import()
+except ImportError:
+    # License enforcement not available - continue with warning
+    print("⚠️ License enforcement not available - ensure compliance with DUAL_LICENSE.txt")
+except Exception:
+    # Silent fail to not break functionality
+    pass
 
 
 class EnhancedForeignObjectsDetector:

@@ -246,3 +246,25 @@ This enhanced foreign objects detection system:
 - ✅ Exports results to JSON for Excel integration
 
 The system is specifically designed to address your request for flagging images with foreign objects and providing detailed reasons for failure, similar to the "out of focus" detection you requested.
+
+## 🤝 Contributing & Support
+
+**Created by:** Dorian Lapi  
+**Email:** [databasemaestro@gmail.com](mailto:databasemaestro@gmail.com)
+
+### 💡 **Contribute to This System:**
+- Improve detection algorithms
+- Add new foreign object types
+- Enhance configuration options
+- Contribute test cases and examples
+- Improve documentation
+
+### 📞 **Need Help?**
+- Questions about implementation
+- Issues with detection accuracy  
+- Feature requests or suggestions
+- Integration support
+
+**Contact me at databasemaestro@gmail.com - I'd love to hear how you're using the foreign objects detection system and any improvements you'd like to see!**
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.

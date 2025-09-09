@@ -1,0 +1,70 @@
+# Copyright Notice
+
+## ImageQualityAnalyzer Project
+
+**Original Author:** Dorian Lapi  
+**Copyright:** © 2025 Dorian Lapi  
+**License:** MIT License (see LICENSE file)
+
+## Attribution Requirements
+
+If you use, modify, or distribute this software, you MUST:
+
+1. **Include Attribution:** Keep "Dorian Lapi" as the original author in any derivative works
+2. **Preserve Copyright:** Include this copyright notice in all copies or substantial portions
+3. **License Compliance:** Maintain the MIT License terms
+
+## Specific Components Created by Dorian Lapi
+
+### Enhanced Focus Detection System
+- `custom_focus_detection.py` - Core enhanced focus detection algorithms
+- `config_focus_detection.json` - Focus detection configuration
+- `focus_excel_reporter.py` - Excel reporting for focus analysis
+- `test_enhanced_focus.py` - Focus detection test suite
+- `demo_focus_workflow.py` - Focus detection workflow demonstration
+
+### Enhanced Foreign Objects Detection System  
+- `enhanced_foreign_objects.py` - Core foreign objects detection algorithms
+- `config_foreign_objects.json` - Foreign objects detection configuration
+- `simple_foreign_objects.py` - Simple CLI interface for foreign objects
+- `test_enhanced_foreign_objects.py` - Foreign objects test suite
+- `foreign_objects_integration.py` - Integration with main analyzer
+- `FOREIGN_OBJECTS_GUIDE.md` - Complete usage documentation
+
+### Core Analysis Components
+- Various test scripts and integration modules
+- Custom configuration systems
+- Excel reporting enhancements
+- Batch processing workflows
+
+## Usage in Derivative Works
+
+When creating derivative works or modifications, you must include one of the following attribution statements:
+
+**In Software/Code:**
+```
+// Based on ImageQualityAnalyzer by Dorian Lapi
+// Original source: https://github.com/[your-repo]/ImageQualityAnalyzer
+```
+
+**In Documentation:**
+```
+This software contains components from ImageQualityAnalyzer 
+created by Dorian Lapi, licensed under the MIT License.
+```
+
+**In GUI/About Section:**
+```
+Includes ImageQualityAnalyzer components by Dorian Lapi
+```
+
+## Commercial Use
+
+This software may be used commercially under the MIT License terms, provided:
+- Attribution to Dorian Lapi is maintained
+- The MIT License is preserved
+- Copyright notices are not removed
+
+## Contact
+
+For questions about licensing or attribution requirements, please ensure proper credit is given to Dorian Lapi as the original author of this ImageQualityAnalyzer system.

@@ -1,5 +1,16 @@
 # ImageQualityAnalyze
 
+**Author:** Dorian Lapi  
+**License:** Dual License (Non-commercial: MIT, Commercial: Proprietary)  
+**Copyright:** © 2025 Dorian Lapi
+
+⚠️ **IMPORTANT: DUAL LICENSE SYSTEM** ⚠️
+
+**🆓 FREE for:** Personal, Educational, Research, Non-profit use  
+**💼 COMMERCIAL LICENSE REQUIRED for:** Business, Enterprise, Revenue-generating use
+
+📧 **Commercial Licensing:** [databasemaestro@gmail.com](mailto:databasemaestro@gmail.com)
+
 An advanced image quality checker for document photos and scans that provides:
 - Objective metrics computation
 - Interactive graphs for human review
@@ -91,6 +102,65 @@ results = analyzer.analyze_batch(["img1.jpg", "img2.jpg", "img3.jpg"])
 analyzer.export_csv_comparison(results, "batch_report.csv")
 ```
 
+## 🤝 Contributing
+
+**Contributions are welcome!** I'd love your help to make ImageQualityAnalyzer even better.
+
+### 🎯 **How to Contribute:**
+- 🐛 **Report bugs** or suggest features
+- 💻 **Submit code** improvements and new features  
+- 📚 **Improve documentation** and examples
+- 🧪 **Add test cases** and edge case handling
+- 🌟 **Share your use cases** and success stories
+
+### 📞 **Get in Touch:**
+- **Email**: [databasemaestro@gmail.com](mailto:databasemaestro@gmail.com)
+- **Subject**: "ImageQualityAnalyzer Contribution - [Your Topic]"
+
+### 📋 **Contribution Guide:**
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
+- Setting up the development environment
+- Code style and testing requirements
+- Attribution requirements for contributions
+- Areas looking for contributors
+
+**Your ideas and contributions help make document image analysis better for everyone!** 🚀
+
 ## License
 
-Free to use and modify. Based on general imaging science principles and open guidelines.
+**DUAL LICENSE SYSTEM - Copyright © 2025 Dorian Lapi**
+
+### 🆓 **Non-Commercial Use (MIT License)**
+Free for personal, educational, research, and non-profit use.
+
+### 💼 **Commercial Use (Proprietary License Required)**
+🚨 **COMMERCIAL LICENSE REQUIRED for:**
+- Business or enterprise use
+- Commercial products or services  
+- Organizations with revenue > $10,000/year
+- Corporate environments
+- Resale or redistribution for profit
+
+📧 **Get Commercial License:** [databasemaestro@gmail.com](mailto:databasemaestro@gmail.com)
+
+### ⚖️ **Legal Protection**
+- ✅ Dual licensing protects against unauthorized commercial use
+- ✅ Strong anti-theft and anti-scam provisions
+- ✅ Digital tracking and audit capabilities
+- ✅ Legal enforcement for violations
+
+### 🛡️ **No Warranties**
+Software provided "AS IS" without warranties or promises:
+- No guarantee of performance or results
+- No liability for damages or losses
+- User assumes all risks
+- No warranty of fitness for purpose
+
+See `LICENSE`, `DUAL_LICENSE.txt` for complete terms.
+
+### Attribution Requirements
+When using this code, you must:
+1. **Include attribution to Dorian Lapi** as the original author
+2. **Preserve copyright notice** in all copies
+3. **Obtain commercial license** for business use
+4. **Comply with dual license terms**

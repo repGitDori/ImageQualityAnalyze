@@ -1,8 +1,13 @@
 """
 Simple Foreign Objects Analyzer - Easy Integration
 
+Copyright (c) 2025 Dorian Lapi
+Licensed under the MIT License - see LICENSE file for details
+
 This script provides a simple interface to add foreign objects detection
 to your existing image quality analysis workflow.
+
+Original Author: Dorian Lapi
 
 Usage:
     python simple_foreign_objects.py <image_path>

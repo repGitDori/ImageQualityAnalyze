@@ -1,9 +1,14 @@
 """
 Foreign Objects Integration Module
 
+Copyright (c) 2025 Dorian Lapi
+Licensed under the MIT License - see LICENSE file for details
+
 This module integrates the enhanced foreign objects detection with the 
 existing ImageQualityAnalyzer system, providing seamless integration
 with your current workflow.
+
+Original Author: Dorian Lapi
 """
 
 import os
